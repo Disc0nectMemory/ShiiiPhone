@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, useSpring, useMotionTemplate } from 'motion/react';
 import { 
-  Battery, 
-  Wifi, 
-  Signal, 
   Camera, 
   Flashlight, 
   Search,
@@ -37,10 +34,23 @@ const LiquidBackground = ({ dragY }: { dragY?: any }) => {
   const dragX1 = useTransform(activeDragY, [0, -400], [0, 60]);
   const dragX2 = useTransform(activeDragY, [0, -400], [0, -40]);
 
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch((e) => {
+        console.error(`Error attempting to enable full-screen mode: ${e.message} (${e.name})`);
+      });
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+    }
+  };
+
   return (
     <motion.div 
+      onClick={toggleFullscreen}
       style={{ filter: filterValue, scale: scaleValue }}
-      className="absolute inset-0 z-0 overflow-hidden bg-[#e0e0e5]"
+      className="absolute inset-0 z-0 overflow-hidden bg-[#e0e0e5] cursor-pointer"
     >
       {/* Primary Blobs - Grayscale with more contrast */}
       <motion.div 
@@ -84,56 +94,6 @@ const LiquidBackground = ({ dragY }: { dragY?: any }) => {
       {/* Subtle Vignette */}
       <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/20 pointer-events-none" />
     </motion.div>
-  );
-};
-
-const StatusBar = ({ dark = true, showTime = true, isLocked = false }: { dark?: boolean; showTime?: boolean; isLocked?: boolean }) => {
-  const [time, setTime] = useState(new Date());
-
-  useEffect(() => {
-    const timer = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const toggleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().catch((e) => {
-        console.error(`Error attempting to enable full-screen mode: ${e.message} (${e.name})`);
-      });
-    } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-      }
-    }
-  };
-
-  return (
-    <div 
-      onClick={toggleFullscreen}
-      className={`flex justify-between items-center px-6 pt-3.5 pb-2 w-full fixed top-0 z-50 cursor-pointer ${dark ? 'text-black' : 'text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)]'}`}
-    >
-      <div className="flex-1">
-        {showTime ? (
-          <div className="text-[16px] font-bold tracking-tight">
-            {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
-          </div>
-        ) : (
-          isLocked && (
-            <div className="text-[14px] font-bold tracking-tight opacity-90">
-              MyShii 5G
-            </div>
-          )
-        )}
-      </div>
-      
-      {/* Dynamic Island Removed as per "不显示原机悬浮窗" request */}
-
-      <div className="flex items-center gap-1.5">
-        <Signal size={17} strokeWidth={2.5} />
-        <Wifi size={17} strokeWidth={2.5} />
-        <Battery size={24} strokeWidth={1.5} className="rotate-0" />
-      </div>
-    </div>
   );
 };
 
@@ -200,8 +160,6 @@ const LockScreen: React.FC<{ onUnlock: () => void }> = ({ onUnlock }) => {
           className="absolute inset-x-0 h-[400px] bg-gradient-to-b from-white/20 to-transparent blur-3xl"
         />
       </motion.div>
-
-      <StatusBar dark={false} showTime={false} isLocked={true} />
 
       <motion.div 
         style={{ 
@@ -293,7 +251,6 @@ const PasscodeScreen: React.FC<{ onCancel: () => void; onSuccess: () => void }> 
       className="relative h-screen w-full flex flex-col items-center pt-24 pb-12 overflow-hidden touch-none"
     >
       <LiquidBackground />
-      <StatusBar dark={false} showTime={false} isLocked={true} />
 
       <div className="z-20 flex flex-col items-center gap-6">
         <div className="text-white text-[22px] font-semibold tracking-tight drop-shadow-md">输入密码</div>
@@ -370,7 +327,6 @@ const HomeScreen: React.FC = () => {
       className="relative h-screen w-full flex flex-col overflow-hidden"
     >
       <LiquidBackground />
-      <StatusBar dark={true} />
 
       {/* App Grid */}
       <div className="flex-1 px-7 pt-16 grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-x-4 gap-y-7 content-start z-10 overflow-y-auto pb-32">

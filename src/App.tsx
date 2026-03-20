@@ -16,6 +16,7 @@ import {
   Wallet,
   Cloud,
   Lock,
+  ChevronUp,
 } from 'lucide-react';
 
 // --- Components ---
@@ -167,13 +168,14 @@ const LockScreen: React.FC<{ onUnlock: () => void }> = ({ onUnlock }) => {
           scale: contentScale,
           filter: contentFilter
         }}
-        className="z-20 flex flex-col items-center mt-[15vh]"
+        className="z-20 flex flex-col items-center mt-[6vh]"
       >
         <div className="flex flex-col items-center">
           <motion.div 
             initial={{ y: -10, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             className="text-black/50 text-[clamp(18px,4vw,24px)] font-semibold mb-1 tracking-tight drop-shadow-[0_1px_1px_rgba(0,0,0,0.1)]"
+            style={{ fontFamily: 'system-ui' }}
           >
             {dateString}
           </motion.div>
@@ -181,6 +183,7 @@ const LockScreen: React.FC<{ onUnlock: () => void }> = ({ onUnlock }) => {
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             className="text-white text-[clamp(80px,15vw,120px)] font-bold tracking-[-0.04em] leading-[1.1] drop-shadow-[0_2px_10px_rgba(0,0,0,0.25)]"
+            style={{ fontFamily: 'Georgia' }}
           >
             {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
           </motion.div>
@@ -189,18 +192,29 @@ const LockScreen: React.FC<{ onUnlock: () => void }> = ({ onUnlock }) => {
 
       <motion.div 
         style={{ opacity: contentOpacity }}
-        className="z-20 w-full max-w-[600px] px-12 flex justify-between items-end mb-[5vh]"
+        className="z-20 w-full flex flex-col items-center mb-[5vh] gap-8"
       >
-        <div className="ios-liquid-button">
-          <Flashlight size={24} strokeWidth={1.8} />
-        </div>
-        
-        <div className="flex flex-col items-center gap-4 mb-[-12px]">
-          <div className="w-32 h-1.25 bg-white/20 rounded-full" />
-        </div>
+        <motion.div
+          animate={{ y: [0, -10, 0], opacity: [0.4, 0.8, 0.4] }}
+          transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+          className="flex flex-col items-center gap-1"
+        >
+          <ChevronUp size={20} className="text-white" strokeWidth={2.5} />
+          <span className="text-white/70 text-[12px] font-bold tracking-[0.2em] uppercase">向上轻扫以解锁</span>
+        </motion.div>
 
-        <div className="ios-liquid-button">
-          <Camera size={24} strokeWidth={1.8} />
+        <div className="w-full max-w-[600px] px-12 flex justify-between items-end">
+          <div className="ios-liquid-button">
+            <Flashlight size={24} strokeWidth={1.8} />
+          </div>
+          
+          <div className="flex flex-col items-center gap-4 mb-[-12px]">
+            <div className="w-32 h-1.25 bg-white/20 rounded-full" />
+          </div>
+
+          <div className="ios-liquid-button">
+            <Camera size={24} strokeWidth={1.8} />
+          </div>
         </div>
       </motion.div>
     </motion.div>

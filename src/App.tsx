@@ -140,7 +140,7 @@ const LockScreen: React.FC<{ onUnlock: () => void }> = ({ onUnlock }) => {
       dragElastic={{ top: 0.15, bottom: 0 }}
       onDragEnd={handleDragEnd}
       style={{ y: smoothDragY }}
-      className="relative h-screen w-full flex flex-col items-center justify-between pt-16 pb-12 overflow-hidden touch-none"
+      className="relative h-screen w-full flex flex-col items-center justify-between pt-16 pb-6 overflow-hidden touch-none"
     >
       <LiquidBackground dragY={smoothDragY} />
       
@@ -192,7 +192,7 @@ const LockScreen: React.FC<{ onUnlock: () => void }> = ({ onUnlock }) => {
 
       <motion.div 
         style={{ opacity: contentOpacity }}
-        className="z-20 w-full flex flex-col items-center mb-[5vh] gap-8"
+        className="z-20 w-full flex flex-col items-center mb-0 gap-4"
       >
         <motion.div
           animate={{ y: [0, -10, 0], opacity: [0.4, 0.8, 0.4] }}
@@ -203,15 +203,11 @@ const LockScreen: React.FC<{ onUnlock: () => void }> = ({ onUnlock }) => {
           <span className="text-white/70 text-[12px] font-bold tracking-[0.2em] uppercase">向上轻扫以解锁</span>
         </motion.div>
 
-        <div className="w-full max-w-[600px] px-12 flex justify-between items-end">
+        <div className="w-full max-w-[600px] px-12 flex justify-between items-end pb-4">
           <div className="ios-liquid-button">
             <Flashlight size={24} strokeWidth={1.8} />
           </div>
           
-          <div className="flex flex-col items-center gap-4 mb-[-12px]">
-            <div className="w-32 h-1.25 bg-white/20 rounded-full" />
-          </div>
-
           <div className="ios-liquid-button">
             <Camera size={24} strokeWidth={1.8} />
           </div>

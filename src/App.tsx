@@ -95,8 +95,23 @@ const StatusBar = ({ dark = true, showTime = true, isLocked = false }: { dark?: 
     return () => clearInterval(timer);
   }, []);
 
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch((e) => {
+        console.error(`Error attempting to enable full-screen mode: ${e.message} (${e.name})`);
+      });
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+    }
+  };
+
   return (
-    <div className={`flex justify-between items-center px-6 pt-3.5 pb-2 w-full fixed top-0 z-50 ${dark ? 'text-black' : 'text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)]'}`}>
+    <div 
+      onClick={toggleFullscreen}
+      className={`flex justify-between items-center px-6 pt-3.5 pb-2 w-full fixed top-0 z-50 cursor-pointer ${dark ? 'text-black' : 'text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)]'}`}
+    >
       <div className="flex-1">
         {showTime ? (
           <div className="text-[16px] font-bold tracking-tight">
@@ -111,17 +126,7 @@ const StatusBar = ({ dark = true, showTime = true, isLocked = false }: { dark?: 
         )}
       </div>
       
-      {/* Liquid Dynamic Island */}
-      <div className="absolute left-1/2 -translate-x-1/2 top-3">
-        <motion.div 
-          layoutId="dynamic-island"
-          className="h-7 min-w-[96px] bg-black rounded-full flex items-center justify-center shadow-lg px-3 gap-2"
-          whileHover={{ scale: 1.05 }}
-        >
-          {isLocked && <Lock size={12} className="text-white" strokeWidth={3} />}
-          <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse ml-auto" />
-        </motion.div>
-      </div>
+      {/* Dynamic Island Removed as per "不显示原机悬浮窗" request */}
 
       <div className="flex items-center gap-1.5">
         <Signal size={17} strokeWidth={2.5} />

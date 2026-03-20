@@ -42,7 +42,7 @@
   }
 
   .keypad-button {
-    @apply w-[75px] h-[75px] rounded-full flex flex-col items-center justify-center text-white transition-colors;
+    @apply w-[72px] h-[72px] rounded-full flex flex-col items-center justify-center text-white transition-colors;
     background: rgba(255, 255, 255, 0.15);
     backdrop-filter: blur(20px);
     border: 0.5px solid rgba(255, 255, 255, 0.2);

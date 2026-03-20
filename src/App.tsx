@@ -201,22 +201,6 @@ const LockScreen: React.FC<{ onUnlock: () => void }> = ({ onUnlock }) => {
         style={{ opacity: contentOpacity }}
         className="z-20 w-full flex flex-col items-center mb-0 gap-4"
       >
-        <motion.div
-          animate={{ y: [0, -10, 0], opacity: [0.4, 0.8, 0.4] }}
-          transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-          className="flex flex-col items-center gap-1"
-        >
-          <ChevronUp size={20} className="text-white" strokeWidth={2.5} />
-          <span 
-            className="text-white/70 font-bold tracking-[0.2em] uppercase"
-            style={{
-              fontFamily: 'system-ui',
-              lineHeight: '4px',
-              fontSize: '10px'
-            }}
-          >向上轻扫以解锁</span>
-        </motion.div>
-
         <div className="w-full max-w-[600px] px-12 flex justify-between items-end pb-4">
           <div className="ios-liquid-button">
             <Flashlight size={24} strokeWidth={1.8} />

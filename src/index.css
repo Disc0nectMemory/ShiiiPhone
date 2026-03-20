@@ -5,9 +5,30 @@
 }
 
 @layer base {
-  body {
-    @apply bg-white text-black overflow-hidden antialiased;
+  html, body {
+    @apply bg-[#e0e0e5] text-black antialiased;
     font-family: var(--font-sans);
+    touch-action: none;
+    overscroll-behavior: none;
+    
+    /* Force full-screen viewport coverage */
+    height: 100vh;
+    height: 100dvh;
+    width: 100vw;
+    width: 100dvw;
+    
+    margin: 0;
+    padding: 0;
+    position: fixed;
+    overflow: hidden;
+    inset: 0;
+  }
+  #root {
+    height: 100%;
+    width: 100%;
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
   }
 }
 
@@ -71,13 +92,30 @@
   }
 
   .ios-liquid-button:active {
-    background: rgba(255, 255, 255, 0.1);
-    transform: scale(0.92);
-    backdrop-filter: blur(15px) saturate(200%);
+    @apply bg-white/10 scale-[0.92] backdrop-blur-md saturate-[200%];
+  }
+
+  .liquid-glass-surface {
+    @apply absolute bottom-0 inset-x-0 z-10 bg-white/5 backdrop-blur-3xl border-t border-white/20 overflow-hidden;
+    box-shadow: 0 -20px 50px rgba(0, 0, 0, 0.1);
+  }
+
+  .chromatic-edge {
+    @apply absolute top-0 inset-x-0 h-[2px] z-20;
+    background: linear-gradient(90deg, 
+      rgba(255, 0, 0, 0.1), 
+      rgba(0, 255, 0, 0.1), 
+      rgba(0, 0, 255, 0.1),
+      rgba(255, 255, 255, 0.3),
+      rgba(0, 0, 255, 0.1),
+      rgba(0, 255, 0, 0.1),
+      rgba(255, 0, 0, 0.1)
+    );
+    filter: blur(1px);
   }
 
   .liquid-blob {
-    @apply absolute rounded-full mix-blend-multiply;
+    @apply absolute rounded-full;
     filter: blur(60px);
     animation: organic-float 25s ease-in-out infinite alternate;
   }

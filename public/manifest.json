@@ -1,0 +1,24 @@
+{
+  "name": "诗诗机",
+  "short_name": "诗诗机",
+  "description": "iOS 26 风格的全屏沉浸式应用",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#e0e0e5",
+  "theme_color": "#e0e0e5",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://picsum.photos/seed/ios/192/192",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://picsum.photos/seed/ios/512/512",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

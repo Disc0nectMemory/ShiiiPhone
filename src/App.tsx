@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence, useMotionValue, useTransform, useSpring, useMotionTemplate } from 'motion/react';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence, useMotionValue, useTransform, useSpring, useMotionTemplate, MotionValue } from 'motion/react';
 import { 
   Camera, 
   Flashlight, 
@@ -53,7 +53,7 @@ const LiquidBackground = ({ dragY }: { dragY?: any }) => {
     <motion.div 
       onClick={toggleFullscreen}
       style={{ filter: filterValue, scale: scaleValue }}
-      className="absolute inset-0 z-0 overflow-hidden bg-[#e0e0e5] cursor-pointer"
+      className="fixed inset-0 z-0 overflow-hidden bg-[#e0e0e5] cursor-pointer"
     >
       {/* Primary Blobs - Grayscale with more contrast */}
       <motion.div 
@@ -100,10 +100,9 @@ const LiquidBackground = ({ dragY }: { dragY?: any }) => {
   );
 };
 
-const LockScreen: React.FC<{ onUnlock: () => void }> = ({ onUnlock }) => {
+const LockScreen: React.FC<{ onUnlock: () => void; dragY: any }> = ({ onUnlock, dragY }) => {
   const [time, setTime] = useState(new Date());
-  const dragY = useMotionValue(0);
-  const smoothDragY = useSpring(dragY, { damping: 25, stiffness: 120 });
+  const smoothDragY = useSpring(dragY, { damping: 25, stiffness: 120 }) as any;
   
   const contentOpacity = useTransform(smoothDragY, [0, -250], [1, 0]);
   const contentScale = useTransform(smoothDragY, [0, -250], [1, 0.85]);
@@ -142,10 +141,8 @@ const LockScreen: React.FC<{ onUnlock: () => void }> = ({ onUnlock }) => {
       dragElastic={{ top: 0.15, bottom: 0 }}
       onDragEnd={handleDragEnd}
       style={{ y: smoothDragY }}
-      className="relative h-screen w-full flex flex-col items-center justify-between pt-16 pb-6 overflow-hidden touch-none"
+      className="fixed inset-0 flex flex-col items-center justify-between pt-[calc(4rem+env(safe-area-inset-top))] pb-[calc(1.5rem+env(safe-area-inset-bottom))] overflow-hidden touch-none"
     >
-      <LiquidBackground dragY={smoothDragY} />
-      
       {/* Liquid Glass Overlay during swipe */}
       <motion.div 
         style={{ 
@@ -219,22 +216,47 @@ const PasscodeScreen: React.FC<{ onCancel: () => void; onSuccess: () => void }> 
   const [passcode, setPasscode] = useState('');
   const [error, setError] = useState(false);
 
+  // Use a ref to track if we're currently in an error state to prevent inputs
+  const isErrorRef = useRef(false);
+
   const handleNumber = (num: string) => {
-    if (passcode.length < 4) {
-      const newPasscode = passcode + num;
-      setPasscode(newPasscode);
-      if (newPasscode.length === 4) {
-        if (newPasscode === '0000') {
-          onSuccess();
+    if (isErrorRef.current) return;
+
+    // Immediate haptic feedback
+    if (window.navigator && window.navigator.vibrate) {
+      window.navigator.vibrate(10);
+    }
+
+    setPasscode((prev) => {
+      if (prev.length >= 4) return prev;
+      const next = prev + num;
+      
+      if (next.length === 4) {
+        if (next === '0000') {
+          // Success - use a small delay to let the last dot fill
+          setTimeout(onSuccess, 50);
         } else {
+          isErrorRef.current = true;
           setError(true);
           setTimeout(() => {
             setPasscode('');
             setError(false);
+            isErrorRef.current = false;
           }, 500);
         }
       }
+      return next;
+    });
+  };
+
+  const handleDelete = () => {
+    if (isErrorRef.current) return;
+
+    if (window.navigator && window.navigator.vibrate) {
+      window.navigator.vibrate(10);
     }
+
+    setPasscode((prev) => prev.slice(0, -1));
   };
 
   const buttons = [
@@ -257,10 +279,8 @@ const PasscodeScreen: React.FC<{ onCancel: () => void; onSuccess: () => void }> 
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 1.1, filter: 'blur(30px)' }}
       transition={{ duration: 0.6, ease: [0.32, 0.72, 0, 1] }}
-      className="fixed inset-0 z-50 flex flex-col items-center pt-20 pb-12 overflow-hidden touch-none bg-black/20 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex flex-col items-center pt-[calc(5rem+env(safe-area-inset-top))] pb-[calc(3rem+env(safe-area-inset-bottom))] overflow-hidden touch-none bg-black/5 backdrop-blur-sm"
     >
-      <LiquidBackground />
-
       <div className="z-20 flex flex-col items-center mt-[8vh] gap-4">
         <div 
           className="text-white font-medium tracking-wide"
@@ -287,17 +307,35 @@ const PasscodeScreen: React.FC<{ onCancel: () => void; onSuccess: () => void }> 
 
       <div className="z-20 mt-[7vh] grid grid-cols-3 gap-x-[24px] gap-y-[16px]">
         {buttons.map((btn) => (
-          <button key={btn.num} onClick={() => handleNumber(btn.num)} className="keypad-button">
-            <span className="text-[32px] font-normal leading-none">{btn.num}</span>
+          <motion.button 
+            key={btn.num} 
+            whileTap={{ backgroundColor: 'rgba(255, 255, 255, 0.4)', scale: 0.92 }}
+            transition={{ type: 'spring', stiffness: 600, damping: 20 }}
+            onPointerDown={(e) => {
+              // Use pointerdown for the absolute fastest response
+              e.preventDefault();
+              handleNumber(btn.num);
+            }}
+            className="keypad-button"
+          >
+            <span className="text-[32px] font-normal leading-none pointer-events-none">{btn.num}</span>
             {btn.letters && (
-              <span className="text-[9px] font-bold tracking-[0.05em] mt-0.5 opacity-90">{btn.letters}</span>
+              <span className="text-[9px] font-bold tracking-[0.05em] mt-0.5 opacity-90 pointer-events-none">{btn.letters}</span>
             )}
-          </button>
+          </motion.button>
         ))}
         <div />
-        <button onClick={() => handleNumber('0')} className="keypad-button">
-          <span className="text-[32px] font-normal leading-none">0</span>
-        </button>
+        <motion.button 
+          whileTap={{ backgroundColor: 'rgba(255, 255, 255, 0.4)', scale: 0.92 }}
+          transition={{ type: 'spring', stiffness: 600, damping: 20 }}
+          onPointerDown={(e) => {
+            e.preventDefault();
+            handleNumber('0');
+          }}
+          className="keypad-button"
+        >
+          <span className="text-[32px] font-normal leading-none pointer-events-none">0</span>
+        </motion.button>
         <div />
       </div>
 
@@ -313,8 +351,15 @@ const PasscodeScreen: React.FC<{ onCancel: () => void; onSuccess: () => void }> 
         紧急情况
       </button>
       <button 
-        onClick={onCancel}
-        className="z-20 absolute text-white font-normal active:opacity-40 transition-opacity drop-shadow-md" 
+        onPointerDown={(e) => {
+          e.preventDefault();
+          if (passcode.length > 0) {
+            handleDelete();
+          } else {
+            onCancel();
+          }
+        }}
+        className="z-20 absolute text-white font-normal active:opacity-40 transition-opacity drop-shadow-md min-w-[40px] text-right" 
         style={{ 
           fontFamily: 'system-ui', 
           fontSize: '16px',
@@ -322,7 +367,7 @@ const PasscodeScreen: React.FC<{ onCancel: () => void; onSuccess: () => void }> 
           bottom: `calc((100vw - ${keypadWidth}px) / 2)`
         }}
       >
-        取消
+        {passcode.length > 0 ? '删除' : '取消'}
       </button>
     </motion.div>
   );
@@ -343,64 +388,78 @@ const AppIcon = ({ icon: Icon, label, color, onClick, showLabel = true }: any) =
   </motion.div>
 );
 
-const HomeScreen: React.FC = () => {
-  const apps = [
-    { icon: Mail, label: '邮件', color: 'bg-blue-500' },
-    { icon: Calendar, label: '日历', color: 'bg-white' },
-    { icon: Camera, label: '照片', color: 'bg-white' },
-    { icon: Camera, label: '相机', color: 'bg-gray-100' },
-    { icon: Clock, label: '时钟', color: 'bg-black' },
-    { icon: Map, label: '地图', color: 'bg-emerald-500' },
-    { icon: Cloud, label: '天气', color: 'bg-sky-400' },
-    { icon: MessageCircle, label: '信息', color: 'bg-green-500' },
-    { icon: Music, label: '音乐', color: 'bg-white' },
-    { icon: Compass, label: '浏览器', color: 'bg-white' },
-    { icon: Wallet, label: '钱包', color: 'bg-black' },
-    { icon: Settings, label: '设置', color: 'bg-gray-400' },
-  ];
+const HomeScreen: React.FC<{ onLock: () => void }> = ({ onLock }) => {
+  const apps: any[] = [];
+  const dragY = useMotionValue(0);
+  const pullDownOpacity = useTransform(dragY, [0, 100], [0, 1]);
+  const pullDownScale = useTransform(dragY, [0, 100], [0.8, 1]);
+  const pullDownShadow = useTransform(
+    dragY, 
+    [0, 40], 
+    ["0px 0px 0px rgba(0,0,0,0)", "0px 50px 100px -20px rgba(0,0,0,0.5)"]
+  );
+
+  const handleDragEnd = (_: any, info: any) => {
+    if (info.offset.y > 120) {
+      onLock();
+    }
+  };
 
   return (
     <motion.div 
       initial={{ opacity: 0, scale: 1.1 }}
       animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.9, filter: 'blur(20px)' }}
       transition={{ duration: 0.5, ease: [0.32, 0.72, 0, 1] }}
-      className="relative h-screen w-full flex flex-col overflow-hidden"
+      className="fixed inset-0 flex flex-col overflow-hidden"
     >
-      <LiquidBackground />
+      {/* Pull down to lock sheet - iOS 26 style full sheet */}
+      <motion.div
+        drag="y"
+        dragConstraints={{ top: 0, bottom: 350 }}
+        dragElastic={0.05}
+        onDragEnd={handleDragEnd}
+        style={{ y: dragY, boxShadow: pullDownShadow }}
+        className="absolute top-[-440px] left-0 right-0 h-[440px] z-[60] flex flex-col items-center justify-end bg-white/20 backdrop-blur-2xl rounded-b-[60px] border-b border-white/30 touch-none"
+      >
+        {/* Invisible Drag Handle - Extends below the panel to catch the initial pull */}
+        <div className="absolute bottom-[-80px] left-0 right-0 h-[80px] cursor-grab active:cursor-grabbing z-[70]" />
+        
+        <div className="flex flex-col items-center gap-4 pb-12 pointer-events-none">
+          <motion.div 
+            style={{ opacity: pullDownOpacity, scale: pullDownScale }}
+            className="flex flex-col items-center gap-3"
+          >
+            <Lock size={32} className="text-black/40" strokeWidth={1.2} />
+            <div className="w-24 h-2 bg-black/10 rounded-full" />
+          </motion.div>
+        </div>
+      </motion.div>
 
       {/* App Grid */}
-      <div className="flex-1 px-7 pt-16 grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-x-4 gap-y-7 content-start z-10 overflow-y-auto pb-32">
+      <div className="flex-1 px-7 pt-[calc(4rem+env(safe-area-inset-top))] grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-x-4 gap-y-7 content-start z-10 overflow-y-auto pb-[calc(8rem+env(safe-area-inset-bottom))]">
         {apps.map((app, i) => (
           <AppIcon key={i} {...app} />
         ))}
       </div>
 
       {/* Search Pill */}
-      <div className="fixed bottom-[140px] left-1/2 -translate-x-1/2 z-10">
-        <div className="liquid-glass-dark px-4 py-1.5 rounded-full flex items-center gap-1.5">
-          <Search size={12} className="text-black/40" strokeWidth={3} />
-          <span className="text-[11px] text-black/60 font-bold tracking-tight">搜索</span>
+      <div className="fixed bottom-[calc(124px+env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 z-20">
+        <div className="liquid-glass-dark px-3 py-1 rounded-full flex items-center gap-1.5 bg-black/10 border-none shadow-none">
+          <Search size={11} className="text-black/30" strokeWidth={3.5} />
+          <span className="text-[10px] text-black/50 font-bold tracking-tight">搜索</span>
         </div>
       </div>
 
-      {/* Page Indicator */}
-      <div className="fixed bottom-[115px] left-1/2 -translate-x-1/2 flex justify-center gap-2 z-10">
-        <div className="w-1.5 h-1.5 rounded-full bg-black/60" />
-        <div className="w-1.5 h-1.5 rounded-full bg-black/10" />
-      </div>
-
       {/* Dock */}
-      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 w-full max-w-[95%] sm:max-w-[600px] px-4 z-10">
-        <div className="liquid-glass rounded-[38px] px-4 py-4 flex justify-around items-center">
-          <AppIcon icon={Phone} color="bg-green-500" showLabel={false} />
-          <AppIcon icon={Compass} color="bg-white" showLabel={false} />
-          <AppIcon icon={MessageCircle} color="bg-green-500" showLabel={false} />
-          <AppIcon icon={Music} color="bg-white" showLabel={false} />
+      <div className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 w-full max-w-[95%] sm:max-w-[600px] px-4 z-10">
+        <div className="liquid-glass rounded-[38px] px-4 py-4 flex justify-around items-center min-h-[92px]">
+          {/* Dock is empty */}
         </div>
       </div>
 
       {/* Home Indicator */}
-      <div className="flex justify-center pb-2 z-10">
+      <div className="flex justify-center pb-[env(safe-area-inset-bottom)] z-10">
         <div className="w-32 h-1.25 bg-white/20 rounded-full" />
       </div>
     </motion.div>
@@ -412,13 +471,18 @@ const HomeScreen: React.FC = () => {
 export default function App() {
   const [isLocked, setIsLocked] = useState(true);
   const [isEnteringPasscode, setIsEnteringPasscode] = useState(false);
+  
+  // Shared drag value for background interaction on lock screen
+  const lockDragY = useMotionValue(0);
 
   return (
-    <div className="h-screen w-full relative overflow-hidden bg-white">
+    <div className="fixed inset-0 overflow-hidden bg-[#e0e0e5]">
+      <LiquidBackground dragY={isLocked && !isEnteringPasscode ? (lockDragY as any) : undefined} />
+      
       <AnimatePresence mode="wait">
         {isLocked ? (
           !isEnteringPasscode ? (
-            <LockScreen key="lock" onUnlock={() => setIsEnteringPasscode(true)} />
+            <LockScreen key="lock" onUnlock={() => setIsEnteringPasscode(true)} dragY={lockDragY} />
           ) : (
             <PasscodeScreen 
               key="passcode" 
@@ -430,7 +494,7 @@ export default function App() {
             />
           )
         ) : (
-          <HomeScreen key="home" />
+          <HomeScreen key="home" onLock={() => setIsLocked(true)} />
         )}
       </AnimatePresence>
     </div>

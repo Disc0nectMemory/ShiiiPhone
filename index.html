@@ -6,7 +6,38 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="theme-color" content="#e0e0e5" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="apple-touch-icon" href="https://picsum.photos/seed/ios/180/180" />
     <title>诗诗机</title>
+    <script>
+      // Prevent double-tap zoom
+      document.addEventListener('touchstart', function (event) {
+        if (event.touches.length > 1) {
+          event.preventDefault();
+        }
+      }, { passive: false });
+      
+      let lastTouchEnd = 0;
+      document.addEventListener('touchend', function (event) {
+        const now = (new Date()).getTime();
+        if (now - lastTouchEnd <= 300) {
+          event.preventDefault();
+        }
+        lastTouchEnd = now;
+      }, false);
+
+      // Register Service Worker
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').then(registration => {
+            console.log('SW registered: ', registration);
+          }).catch(registrationError => {
+            console.log('SW registration failed: ', registrationError);
+          });
+        });
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence, useMotionValue, useTransform, useSpring, useMotionTemplate } from 'motion/react';
 import { 
   Battery, 
   Wifi, 
   Signal, 
   Camera, 
   Flashlight, 
-  Lock,
   Search,
   MessageCircle,
   Phone,
@@ -14,18 +13,81 @@ import {
   Music,
   Calendar,
   Settings,
-  AppWindow,
   Compass,
   Map,
   Clock,
   Wallet,
   Cloud,
-  Play
+  Lock,
 } from 'lucide-react';
 
 // --- Components ---
 
-const StatusBar = ({ dark = false }: { dark?: boolean }) => {
+const LiquidBackground = ({ dragY }: { dragY?: any }) => {
+  const defaultDragY = useMotionValue(0);
+  const activeDragY = dragY || defaultDragY;
+  
+  const blurValue = useTransform(activeDragY, [0, -400], [60, 100]);
+  const scaleValue = useTransform(activeDragY, [0, -400], [1, 1.15]);
+  const filterValue = useMotionTemplate`blur(${blurValue}px)`;
+  
+  // Dynamic blob movements based on drag
+  const dragY1 = useTransform(activeDragY, [0, -400], [0, -120]);
+  const dragY2 = useTransform(activeDragY, [0, -400], [0, 100]);
+  const dragX1 = useTransform(activeDragY, [0, -400], [0, 60]);
+  const dragX2 = useTransform(activeDragY, [0, -400], [0, -40]);
+
+  return (
+    <motion.div 
+      style={{ filter: filterValue, scale: scaleValue }}
+      className="absolute inset-0 z-0 overflow-hidden bg-[#e0e0e5]"
+    >
+      {/* Primary Blobs - Grayscale with more contrast */}
+      <motion.div 
+        style={{ y: dragY1 }} 
+        className="liquid-blob w-[600px] h-[600px] bg-slate-400/40 top-[-10%] left-[-10%] opacity-80" 
+      />
+      <motion.div 
+        style={{ y: dragY2, animationDelay: '-7s' }} 
+        className="liquid-blob w-[500px] h-[500px] bg-zinc-500/30 bottom-[-5%] right-[-5%] opacity-70" 
+      />
+      <motion.div 
+        style={{ x: dragX1, animationDelay: '-14s' }} 
+        className="liquid-blob w-[450px] h-[450px] bg-stone-400/30 top-[20%] right-[-10%] opacity-60" 
+      />
+      <motion.div 
+        style={{ x: dragX2, animationDelay: '-21s' }} 
+        className="liquid-blob w-[550px] h-[550px] bg-gray-400/30 bottom-[10%] left-[-5%] opacity-50" 
+      />
+      
+      {/* Accent Blobs for Mesh Effect */}
+      <motion.div 
+        animate={{ 
+          scale: [1, 1.2, 1],
+          opacity: [0.3, 0.5, 0.3]
+        }}
+        transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute top-[40%] left-[30%] w-[300px] h-[300px] bg-white/60 rounded-full blur-[80px]" 
+      />
+      <motion.div 
+        animate={{ 
+          scale: [1.2, 1, 1.2],
+          opacity: [0.2, 0.4, 0.2]
+        }}
+        transition={{ duration: 18, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+        className="absolute bottom-[30%] right-[20%] w-[350px] h-[350px] bg-slate-200/40 rounded-full blur-[90px]" 
+      />
+
+      {/* Noise Texture */}
+      <div className="liquid-noise" />
+      
+      {/* Subtle Vignette */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/20 pointer-events-none" />
+    </motion.div>
+  );
+};
+
+const StatusBar = ({ dark = true, showTime = true, isLocked = false }: { dark?: boolean; showTime?: boolean; isLocked?: boolean }) => {
   const [time, setTime] = useState(new Date());
 
   useEffect(() => {
@@ -34,21 +96,55 @@ const StatusBar = ({ dark = false }: { dark?: boolean }) => {
   }, []);
 
   return (
-    <div className={`flex justify-between items-center px-8 pt-4 pb-2 w-full fixed top-0 z-50 ${dark ? 'text-black' : 'text-white'}`}>
-      <div className="text-[15px] font-semibold">
-        {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
+    <div className={`flex justify-between items-center px-6 pt-3.5 pb-2 w-full fixed top-0 z-50 ${dark ? 'text-black' : 'text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)]'}`}>
+      <div className="flex-1">
+        {showTime ? (
+          <div className="text-[16px] font-bold tracking-tight">
+            {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
+          </div>
+        ) : (
+          isLocked && (
+            <div className="text-[14px] font-bold tracking-tight opacity-90">
+              MyShii 5G
+            </div>
+          )
+        )}
       </div>
+      
+      {/* Liquid Dynamic Island */}
+      <div className="absolute left-1/2 -translate-x-1/2 top-3">
+        <motion.div 
+          layoutId="dynamic-island"
+          className="h-7 min-w-[96px] bg-black rounded-full flex items-center justify-center shadow-lg px-3 gap-2"
+          whileHover={{ scale: 1.05 }}
+        >
+          {isLocked && <Lock size={12} className="text-white" strokeWidth={3} />}
+          <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse ml-auto" />
+        </motion.div>
+      </div>
+
       <div className="flex items-center gap-1.5">
-        <Signal size={16} strokeWidth={2.5} />
-        <Wifi size={16} strokeWidth={2.5} />
-        <Battery size={20} strokeWidth={2} className="rotate-0" />
+        <Signal size={17} strokeWidth={2.5} />
+        <Wifi size={17} strokeWidth={2.5} />
+        <Battery size={24} strokeWidth={1.5} className="rotate-0" />
       </div>
     </div>
   );
 };
 
-const LockScreen = ({ onUnlock }: { onUnlock: () => void }) => {
+const LockScreen: React.FC<{ onUnlock: () => void }> = ({ onUnlock }) => {
   const [time, setTime] = useState(new Date());
+  const dragY = useMotionValue(0);
+  const smoothDragY = useSpring(dragY, { damping: 25, stiffness: 120 });
+  
+  const contentOpacity = useTransform(smoothDragY, [0, -250], [1, 0]);
+  const contentScale = useTransform(smoothDragY, [0, -250], [1, 0.85]);
+  const contentBlurValue = useTransform(smoothDragY, [0, -250], [0, 15]);
+  const contentFilter = useMotionTemplate`blur(${contentBlurValue}px)`;
+  
+  const glassOpacity = useTransform(smoothDragY, [0, -150], [0, 0.6]);
+  const glassBlur = useTransform(smoothDragY, [0, -400], [0, 60]);
+  const backdropFilter = useMotionTemplate`blur(${glassBlur}px)`;
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
@@ -61,50 +157,170 @@ const LockScreen = ({ onUnlock }: { onUnlock: () => void }) => {
     weekday: 'long' 
   });
 
+  const handleDragEnd = (_: any, info: any) => {
+    if (info.offset.y < -150) {
+      onUnlock();
+    }
+  };
+
   return (
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      exit={{ opacity: 0, scale: 1.1, filter: 'blur(20px)' }}
-      transition={{ duration: 0.5, ease: "easeInOut" }}
-      className="relative h-screen w-full bg-cover bg-center flex flex-col items-center justify-between py-16 overflow-hidden"
-      style={{ backgroundImage: 'url(https://picsum.photos/seed/ios16/1170/2532)' }}
-      onClick={onUnlock}
+      exit={{ opacity: 0, scale: 1.2, filter: 'blur(60px)' }}
+      transition={{ duration: 0.8, ease: [0.32, 0.72, 0, 1] }}
+      drag="y"
+      dragConstraints={{ top: -600, bottom: 0 }}
+      dragElastic={{ top: 0.15, bottom: 0 }}
+      onDragEnd={handleDragEnd}
+      style={{ y: smoothDragY }}
+      className="relative h-screen w-full flex flex-col items-center justify-between pt-16 pb-12 overflow-hidden touch-none"
     >
-      <div className="absolute inset-0 bg-black/10" />
+      <LiquidBackground dragY={smoothDragY} />
       
-      <StatusBar />
+      {/* Liquid Glass Overlay during swipe */}
+      <motion.div 
+        style={{ 
+          opacity: glassOpacity,
+          backdropFilter,
+        }}
+        className="absolute inset-0 z-10 bg-white/5 pointer-events-none"
+      >
+        {/* Shine effect */}
+        <motion.div 
+          style={{ 
+            y: useTransform(smoothDragY, [0, -600], [400, -200]),
+            opacity: useTransform(smoothDragY, [0, -300], [0, 0.4])
+          }}
+          className="absolute inset-x-0 h-[400px] bg-gradient-to-b from-white/20 to-transparent blur-3xl"
+        />
+      </motion.div>
 
-      <div className="z-10 flex flex-col items-center mt-12">
+      <StatusBar dark={false} showTime={false} isLocked={true} />
+
+      <motion.div 
+        style={{ 
+          opacity: contentOpacity, 
+          scale: contentScale,
+          filter: contentFilter
+        }}
+        className="z-20 flex flex-col items-center mt-12"
+      >
+        <div className="flex flex-col items-center">
+          <motion.div 
+            initial={{ y: -10, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            className="text-black/50 text-[21px] font-semibold mb-1 tracking-tight drop-shadow-[0_1px_1px_rgba(0,0,0,0.1)]"
+          >
+            {dateString}
+          </motion.div>
+          <motion.div 
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="text-white text-[102px] font-bold tracking-[-0.04em] leading-[1.1] drop-shadow-[0_2px_10px_rgba(0,0,0,0.25)]"
+          >
+            {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
+          </motion.div>
+        </div>
+      </motion.div>
+
+      <motion.div 
+        style={{ opacity: contentOpacity }}
+        className="z-20 w-full px-12 flex justify-between items-end"
+      >
+        <div className="ios-liquid-button">
+          <Flashlight size={24} strokeWidth={1.8} />
+        </div>
+        
+        <div className="flex flex-col items-center gap-4 mb-[-12px]">
+          <div className="w-32 h-1.25 bg-white/20 rounded-full" />
+        </div>
+
+        <div className="ios-liquid-button">
+          <Camera size={24} strokeWidth={1.8} />
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+};
+
+const PasscodeScreen: React.FC<{ onCancel: () => void; onSuccess: () => void }> = ({ onCancel, onSuccess }) => {
+  const [passcode, setPasscode] = useState('');
+  const [error, setError] = useState(false);
+
+  const handleNumber = (num: string) => {
+    if (passcode.length < 4) {
+      const newPasscode = passcode + num;
+      setPasscode(newPasscode);
+      if (newPasscode.length === 4) {
+        if (newPasscode === '0000') {
+          onSuccess();
+        } else {
+          setError(true);
+          setTimeout(() => {
+            setPasscode('');
+            setError(false);
+          }, 500);
+        }
+      }
+    }
+  };
+
+  const buttons = [
+    { num: '1', letters: '' },
+    { num: '2', letters: 'ABC' },
+    { num: '3', letters: 'DEF' },
+    { num: '4', letters: 'GHI' },
+    { num: '5', letters: 'JKL' },
+    { num: '6', letters: 'MNO' },
+    { num: '7', letters: 'PQRS' },
+    { num: '8', letters: 'TUV' },
+    { num: '9', letters: 'WXYZ' },
+    { num: '0', letters: '' },
+  ];
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0, scale: 1.1 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 1.1, filter: 'blur(30px)' }}
+      transition={{ duration: 0.6, ease: [0.32, 0.72, 0, 1] }}
+      className="relative h-screen w-full flex flex-col items-center pt-24 pb-12 overflow-hidden touch-none"
+    >
+      <LiquidBackground />
+      <StatusBar dark={false} showTime={false} isLocked={true} />
+
+      <div className="z-20 flex flex-col items-center gap-6">
+        <div className="text-white text-[22px] font-semibold tracking-tight drop-shadow-md">输入密码</div>
+        
         <motion.div 
-          initial={{ y: -20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          className="text-white/90 text-xl font-medium mb-1"
+          animate={error ? { x: [-10, 10, -10, 10, 0] } : {}}
+          transition={{ duration: 0.4 }}
+          className="flex gap-6"
         >
-          {dateString}
-        </motion.div>
-        <motion.div 
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          className="text-white text-8xl font-bold tracking-tighter"
-        >
-          {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} className={`passcode-dot ${passcode.length > i ? 'filled' : ''}`} />
+          ))}
         </motion.div>
       </div>
 
-      <div className="z-10 w-full px-10 flex justify-between items-end mb-8">
-        <div className="w-12 h-12 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center text-white">
-          <Flashlight size={24} />
-        </div>
-        <div className="flex flex-col items-center gap-4">
-          <div className="text-white/70 text-sm font-medium animate-pulse-subtle">
-            点击或上滑解锁
-          </div>
-          <div className="w-32 h-1.5 bg-white/40 rounded-full" />
-        </div>
-        <div className="w-12 h-12 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center text-white">
-          <Camera size={24} />
-        </div>
+      <div className="z-20 mt-16 grid grid-cols-3 gap-x-6 gap-y-4">
+        {buttons.slice(0, 9).map((btn) => (
+          <button key={btn.num} onClick={() => handleNumber(btn.num)} className="keypad-button">
+            <span className="text-[32px] font-medium leading-none">{btn.num}</span>
+            <span className="text-[10px] font-bold tracking-[0.1em] mt-1 opacity-70">{btn.letters}</span>
+          </button>
+        ))}
+        <div />
+        <button onClick={() => handleNumber('0')} className="keypad-button">
+          <span className="text-[32px] font-medium leading-none">0</span>
+        </button>
+        <div />
+      </div>
+
+      <div className="z-20 mt-auto w-full px-12 flex justify-between items-center text-white font-semibold text-[17px] drop-shadow-md">
+        <button className="active:opacity-40 transition-opacity">紧急情况</button>
+        <button onClick={onCancel} className="active:opacity-40 transition-opacity">取消</button>
       </div>
     </motion.div>
   );
@@ -116,19 +332,21 @@ const AppIcon = ({ icon: Icon, label, color, onClick, showLabel = true }: any) =
     className="flex flex-col items-center gap-1.5"
     onClick={onClick}
   >
-    <div className={`w-[60px] h-[60px] rounded-[18px] flex items-center justify-center shadow-lg ${color}`}>
-      <Icon size={34} color={color === 'bg-white' ? '#1c1c1e' : 'white'} strokeWidth={1.5} />
+    <div className={`w-[60px] h-[60px] rounded-[18px] flex items-center justify-center shadow-lg relative overflow-hidden ${color}`}>
+      {/* Liquid Overlay */}
+      <div className="absolute inset-0 bg-white/10 backdrop-blur-[2px]" />
+      <Icon size={38} color={color === 'bg-white' ? '#1c1c1e' : 'white'} strokeWidth={1.5} className="relative z-10" />
     </div>
-    {showLabel && <span className="text-[11px] text-white font-medium">{label}</span>}
+    {showLabel && <span className="text-[12px] text-black/80 font-medium tracking-tight">{label}</span>}
   </motion.div>
 );
 
-const HomeScreen = () => {
+const HomeScreen: React.FC = () => {
   const apps = [
     { icon: Mail, label: '邮件', color: 'bg-blue-500' },
-    { icon: Calendar, label: '日历', color: 'bg-white' }, // Calendar is usually white
-    { icon: Camera, label: '照片', color: 'bg-white' }, // Photos icon is complex, white bg is safer
-    { icon: Camera, label: '相机', color: 'bg-gray-200' },
+    { icon: Calendar, label: '日历', color: 'bg-white' },
+    { icon: Camera, label: '照片', color: 'bg-white' },
+    { icon: Camera, label: '相机', color: 'bg-gray-100' },
     { icon: Clock, label: '时钟', color: 'bg-black' },
     { icon: Map, label: '地图', color: 'bg-emerald-500' },
     { icon: Cloud, label: '天气', color: 'bg-sky-400' },
@@ -141,32 +359,38 @@ const HomeScreen = () => {
 
   return (
     <motion.div 
-      initial={{ opacity: 0, scale: 1.2 }}
+      initial={{ opacity: 0, scale: 1.1 }}
       animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.6, ease: [0.32, 0.72, 0, 1] }}
-      className="relative h-screen w-full bg-cover bg-center flex flex-col overflow-hidden"
-      style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop)' }}
+      transition={{ duration: 0.5, ease: [0.32, 0.72, 0, 1] }}
+      className="relative h-screen w-full flex flex-col overflow-hidden"
     >
-      <div className="absolute inset-0 bg-black/10 backdrop-blur-[1px]" />
-      
-      <StatusBar />
+      <LiquidBackground />
+      <StatusBar dark={true} />
 
       {/* App Grid */}
-      <div className="flex-1 px-6 pt-24 grid grid-cols-4 gap-x-4 gap-y-7 content-start z-10">
+      <div className="flex-1 px-7 pt-16 grid grid-cols-4 gap-x-4 gap-y-7 content-start z-10">
         {apps.map((app, i) => (
           <AppIcon key={i} {...app} />
         ))}
       </div>
 
+      {/* Search Pill */}
+      <div className="flex justify-center mb-5 z-10">
+        <div className="liquid-glass-dark px-4 py-1.5 rounded-full flex items-center gap-1.5">
+          <Search size={12} className="text-black/40" strokeWidth={3} />
+          <span className="text-[11px] text-black/60 font-bold tracking-tight">搜索</span>
+        </div>
+      </div>
+
       {/* Page Indicator */}
-      <div className="flex justify-center gap-2 mb-6 z-10">
-        <div className="w-1.5 h-1.5 rounded-full bg-white" />
-        <div className="w-1.5 h-1.5 rounded-full bg-white/30" />
+      <div className="flex justify-center gap-2 mb-4 z-10">
+        <div className="w-1.5 h-1.5 rounded-full bg-black/60" />
+        <div className="w-1.5 h-1.5 rounded-full bg-black/10" />
       </div>
 
       {/* Dock */}
-      <div className="px-4 pb-8 z-10">
-        <div className="ios-blur rounded-[36px] px-4 py-4 flex justify-around items-center ios-shadow border border-white/10">
+      <div className="px-4 pb-4 z-10">
+        <div className="liquid-glass rounded-[38px] px-4 py-4 flex justify-around items-center">
           <AppIcon icon={Phone} color="bg-green-500" showLabel={false} />
           <AppIcon icon={Compass} color="bg-white" showLabel={false} />
           <AppIcon icon={MessageCircle} color="bg-green-500" showLabel={false} />
@@ -176,7 +400,7 @@ const HomeScreen = () => {
 
       {/* Home Indicator */}
       <div className="flex justify-center pb-2 z-10">
-        <div className="w-32 h-1.5 bg-white/40 rounded-full" />
+        <div className="w-32 h-1.25 bg-white/20 rounded-full" />
       </div>
     </motion.div>
   );
@@ -186,12 +410,24 @@ const HomeScreen = () => {
 
 export default function App() {
   const [isLocked, setIsLocked] = useState(true);
+  const [isEnteringPasscode, setIsEnteringPasscode] = useState(false);
 
   return (
-    <div className="h-screen w-full max-w-[430px] mx-auto relative overflow-hidden shadow-2xl border-x border-white/10 bg-black">
+    <div className="h-screen w-full max-w-[430px] mx-auto relative overflow-hidden shadow-2xl bg-white">
       <AnimatePresence mode="wait">
         {isLocked ? (
-          <LockScreen key="lock" onUnlock={() => setIsLocked(false)} />
+          !isEnteringPasscode ? (
+            <LockScreen key="lock" onUnlock={() => setIsEnteringPasscode(true)} />
+          ) : (
+            <PasscodeScreen 
+              key="passcode" 
+              onCancel={() => setIsEnteringPasscode(false)} 
+              onSuccess={() => {
+                setIsLocked(false);
+                setIsEnteringPasscode(false);
+              }} 
+            />
+          )
         ) : (
           <HomeScreen key="home" />
         )}

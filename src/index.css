@@ -1,29 +1,124 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@700&family=JetBrains+Mono:wght@400;500&display=swap');
 @import "tailwindcss";
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Outfit", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 }
 
 @layer base {
   body {
-    @apply bg-black text-white overflow-hidden antialiased;
+    @apply bg-white text-black overflow-hidden antialiased;
     font-family: var(--font-sans);
   }
 }
 
-.ios-blur {
-  @apply backdrop-blur-xl bg-white/20;
+@layer utilities {
+  .liquid-glass {
+    @apply backdrop-blur-3xl bg-white/20 border border-white/40 shadow-[0_8px_32px_0_rgba(255,255,255,0.1)];
+    box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.2);
+  }
+  
+  .liquid-glass-dark {
+    @apply backdrop-blur-3xl bg-black/10 border border-black/5 shadow-[0_8px_32px_0_rgba(0,0,0,0.05)];
+    box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.05);
+  }
+
+  .liquid-blob {
+    position: absolute;
+    filter: blur(80px);
+    border-radius: 50%;
+    z-index: 0;
+    opacity: 0.6;
+    animation: float 25s infinite alternate ease-in-out;
+    mix-blend-mode: soft-light;
+  }
+
+  .liquid-noise {
+    position: absolute;
+    inset: 0;
+    opacity: 0.03;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    z-index: 5;
+  }
+
+  .keypad-button {
+    @apply w-[75px] h-[75px] rounded-full flex flex-col items-center justify-center text-white transition-colors;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .keypad-button:active {
+    background: rgba(0, 0, 0, 0.5);
+  }
+
+  .passcode-dot {
+    @apply w-3 h-3 rounded-full border-[1.5px] border-white transition-colors;
+  }
+
+  .passcode-dot.filled {
+    @apply bg-white;
+  }
+
+  .ios-liquid-button {
+    @apply w-[52px] h-[52px] rounded-full flex items-center justify-center text-white transition-all duration-300;
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(25px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .ios-liquid-button:active {
+    background: rgba(255, 255, 255, 0.1);
+    transform: scale(0.92);
+    backdrop-filter: blur(15px) saturate(200%);
+  }
+
+  .liquid-blob {
+    @apply absolute rounded-full mix-blend-multiply;
+    filter: blur(60px);
+    animation: organic-float 25s ease-in-out infinite alternate;
+  }
+
+  .liquid-noise {
+    @apply absolute inset-0 opacity-[0.02] pointer-events-none mix-blend-overlay;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  }
 }
 
-.ios-shadow {
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+@keyframes organic-float {
+  0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+  33% { transform: translate(10%, 15%) scale(1.1) rotate(120deg); }
+  66% { transform: translate(-15%, 10%) scale(0.9) rotate(240deg); }
+  100% { transform: translate(5%, -5%) scale(1.05) rotate(360deg); }
+}
+
+@keyframes float {
+  0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+  33% { transform: translate(15%, 20%) scale(1.2) rotate(10deg); }
+  66% { transform: translate(-10%, 15%) scale(0.8) rotate(-10deg); }
+  100% { transform: translate(10%, -10%) scale(1.1) rotate(5deg); }
 }
 
 @keyframes pulse-subtle {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
 }
 
 .animate-pulse-subtle {
-  animation: pulse-subtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  animation: pulse-subtle 4s ease-in-out infinite;
+}
+
+/* Hide scrollbar */
+::-webkit-scrollbar {
+  display: none;
+}
+* {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

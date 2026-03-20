@@ -1,10 +1,10 @@
 {
-  "name": "ShiiiPhone",
-  "short_name": "Shii",
-  "description": "Liquid iPhone style PWA built with Vite + React",
+  "name": "诗诗机",
+  "short_name": "诗诗机",
+  "description": "诗诗机液态交互 PWA 应用",
   "icons": [
     {
-      "src": "/Shii.png",
+      "src": "/诗诗机.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"

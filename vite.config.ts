@@ -17,16 +17,16 @@ export default defineConfig(({mode}) => {
           enabled: true,
         },
         manifest: {
-          name: 'ShiiiPhone',
-          short_name: 'Shii',
-          description: 'Liquid iPhone style PWA built with Vite + React',
+          name: '诗诗机',
+          short_name: '诗诗机',
+          description: '诗诗机液态交互 PWA 应用',
           theme_color: '#0B1B40',
           background_color: '#0B1B40',
           display: 'standalone',
           start_url: '.',
           icons: [
             {
-              src: '/Shii.png',
+              src: '/诗诗机.png',
               sizes: '512x512',
               type: 'image/png',
               purpose: 'any maskable',

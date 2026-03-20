@@ -17,6 +17,8 @@ import {
   Cloud,
   Lock,
   ChevronUp,
+  Wifi,
+  Signal,
 } from 'lucide-react';
 
 // --- Components ---
@@ -168,13 +170,13 @@ const LockScreen: React.FC<{ onUnlock: () => void }> = ({ onUnlock }) => {
           scale: contentScale,
           filter: contentFilter
         }}
-        className="z-20 flex flex-col items-center mt-[6vh]"
+        className="z-20 flex flex-col items-center mt-[2vh]"
       >
-        <div className="flex flex-col items-center">
+        <div className="flex flex-col items-center gap-2">
           <motion.div 
             initial={{ y: -10, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            className="text-black/50 text-[clamp(18px,4vw,24px)] font-semibold mb-1 tracking-tight drop-shadow-[0_1px_1px_rgba(0,0,0,0.1)]"
+            className="text-black/50 text-[clamp(18px,4vw,24px)] font-semibold tracking-tight drop-shadow-[0_1px_1px_rgba(0,0,0,0.1)]"
             style={{ fontFamily: 'system-ui' }}
           >
             {dateString}
@@ -182,8 +184,13 @@ const LockScreen: React.FC<{ onUnlock: () => void }> = ({ onUnlock }) => {
           <motion.div 
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="text-white text-[clamp(80px,15vw,120px)] font-bold tracking-[-0.04em] leading-[1.1] drop-shadow-[0_2px_10px_rgba(0,0,0,0.25)]"
-            style={{ fontFamily: 'Georgia' }}
+            className="text-white font-bold tracking-[-0.04em] drop-shadow-[0_2px_10px_rgba(0,0,0,0.25)] flex justify-center items-center"
+            style={{ 
+              fontFamily: 'Georgia',
+              fontSize: '106px',
+              lineHeight: '85px',
+              width: '280px'
+            }}
           >
             {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
           </motion.div>
@@ -200,7 +207,14 @@ const LockScreen: React.FC<{ onUnlock: () => void }> = ({ onUnlock }) => {
           className="flex flex-col items-center gap-1"
         >
           <ChevronUp size={20} className="text-white" strokeWidth={2.5} />
-          <span className="text-white/70 text-[12px] font-bold tracking-[0.2em] uppercase">向上轻扫以解锁</span>
+          <span 
+            className="text-white/70 font-bold tracking-[0.2em] uppercase"
+            style={{
+              fontFamily: 'system-ui',
+              lineHeight: '4px',
+              fontSize: '10px'
+            }}
+          >向上轻扫以解锁</span>
         </motion.div>
 
         <div className="w-full max-w-[600px] px-12 flex justify-between items-end pb-4">
@@ -249,8 +263,9 @@ const PasscodeScreen: React.FC<{ onCancel: () => void; onSuccess: () => void }> 
     { num: '7', letters: 'PQRS' },
     { num: '8', letters: 'TUV' },
     { num: '9', letters: 'WXYZ' },
-    { num: '0', letters: '' },
   ];
+
+  const keypadWidth = 264; // 72*3 + 24*2
 
   return (
     <motion.div 
@@ -258,42 +273,73 @@ const PasscodeScreen: React.FC<{ onCancel: () => void; onSuccess: () => void }> 
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 1.1, filter: 'blur(30px)' }}
       transition={{ duration: 0.6, ease: [0.32, 0.72, 0, 1] }}
-      className="relative h-screen w-full flex flex-col items-center pt-24 pb-12 overflow-hidden touch-none"
+      className="fixed inset-0 z-50 flex flex-col items-center pt-20 pb-12 overflow-hidden touch-none bg-black/20 backdrop-blur-sm"
     >
       <LiquidBackground />
 
-      <div className="z-20 flex flex-col items-center gap-6">
-        <div className="text-white text-[22px] font-semibold tracking-tight drop-shadow-md">输入密码</div>
+      <div className="z-20 flex flex-col items-center mt-[8vh] gap-4">
+        <div 
+          className="text-white font-medium tracking-wide"
+          style={{ fontFamily: 'system-ui', fontSize: '20px' }}
+        >
+          输入密码
+        </div>
         
         <motion.div 
           animate={error ? { x: [-10, 10, -10, 10, 0] } : {}}
           transition={{ duration: 0.4 }}
-          className="flex gap-6"
+          className="flex gap-5 mt-1"
         >
           {[0, 1, 2, 3].map((i) => (
-            <div key={i} className={`passcode-dot ${passcode.length > i ? 'filled' : ''}`} />
+            <div 
+              key={i} 
+              className={`w-2.5 h-2.5 rounded-full border-[1.5px] border-white transition-colors duration-200 ${
+                passcode.length > i ? 'bg-white' : 'bg-transparent'
+              }`} 
+            />
           ))}
         </motion.div>
       </div>
 
-      <div className="z-20 mt-[10vh] grid grid-cols-3 gap-x-6 gap-y-4 max-w-[400px]">
-        {buttons.slice(0, 9).map((btn) => (
+      <div className="z-20 mt-[7vh] grid grid-cols-3 gap-x-[24px] gap-y-[16px]">
+        {buttons.map((btn) => (
           <button key={btn.num} onClick={() => handleNumber(btn.num)} className="keypad-button">
-            <span className="text-[32px] font-medium leading-none">{btn.num}</span>
-            <span className="text-[10px] font-bold tracking-[0.1em] mt-1 opacity-70">{btn.letters}</span>
+            <span className="text-[32px] font-normal leading-none">{btn.num}</span>
+            {btn.letters && (
+              <span className="text-[9px] font-bold tracking-[0.05em] mt-0.5 opacity-90">{btn.letters}</span>
+            )}
           </button>
         ))}
         <div />
         <button onClick={() => handleNumber('0')} className="keypad-button">
-          <span className="text-[32px] font-medium leading-none">0</span>
+          <span className="text-[32px] font-normal leading-none">0</span>
         </button>
         <div />
       </div>
 
-      <div className="z-20 mt-auto w-full max-w-[400px] px-12 flex justify-between items-center text-white font-semibold text-[17px] drop-shadow-md mb-[5vh]">
-        <button className="active:opacity-40 transition-opacity">紧急情况</button>
-        <button onClick={onCancel} className="active:opacity-40 transition-opacity">取消</button>
-      </div>
+      <button 
+        className="z-20 absolute text-white font-normal active:opacity-40 transition-opacity drop-shadow-md" 
+        style={{ 
+          fontFamily: 'system-ui', 
+          fontSize: '16px',
+          left: `calc((100vw - ${keypadWidth}px) / 2)`,
+          bottom: `calc((100vw - ${keypadWidth}px) / 2)`
+        }}
+      >
+        紧急情况
+      </button>
+      <button 
+        onClick={onCancel}
+        className="z-20 absolute text-white font-normal active:opacity-40 transition-opacity drop-shadow-md" 
+        style={{ 
+          fontFamily: 'system-ui', 
+          fontSize: '16px',
+          right: `calc((100vw - ${keypadWidth}px) / 2)`,
+          bottom: `calc((100vw - ${keypadWidth}px) / 2)`
+        }}
+      >
+        取消
+      </button>
     </motion.div>
   );
 };

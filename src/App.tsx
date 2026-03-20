@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, useSpring, useMotionTemplate } from 'motion/react';
+import { registerSW } from 'virtual:pwa-register';
 import { 
   Battery, 
   Wifi, 
@@ -20,6 +21,14 @@ import {
   Cloud,
   Lock,
 } from 'lucide-react';
+
+type BeforeInstallPromptEvent = Event & {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{
+    outcome: 'accepted' | 'dismissed';
+    platform: string;
+  }>;
+};
 
 // --- Components ---
 
@@ -411,9 +420,81 @@ const HomeScreen: React.FC = () => {
 export default function App() {
   const [isLocked, setIsLocked] = useState(true);
   const [isEnteringPasscode, setIsEnteringPasscode] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [installStatus, setInstallStatus] = useState('');
+  const [isOfflineReady, setOfflineReady] = useState(false);
+  const [needRefresh, setNeedRefresh] = useState(false);
+
+  useEffect(() => {
+    const unregister = registerSW({
+      onNeedRefresh() {
+        setNeedRefresh(true);
+      },
+      onOfflineReady() {
+        setOfflineReady(true);
+      },
+    });
+
+    const beforeInstallHandler = (event: Event) => {
+      const e = event as BeforeInstallPromptEvent;
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+
+    const appInstalledHandler = () => {
+      setInstallStatus('已安装到主屏幕');
+      setDeferredPrompt(null);
+    };
+
+    window.addEventListener('beforeinstallprompt', beforeInstallHandler);
+    window.addEventListener('appinstalled', appInstalledHandler);
+
+    return () => {
+      unregister();
+      window.removeEventListener('beforeinstallprompt', beforeInstallHandler);
+      window.removeEventListener('appinstalled', appInstalledHandler);
+    };
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const choiceResult = await deferredPrompt.userChoice;
+    if (choiceResult.outcome === 'accepted') {
+      setInstallStatus('用户接受安装');
+    } else {
+      setInstallStatus('用户取消安装');
+    }
+    setDeferredPrompt(null);
+  };
+
+  const handleRefresh = () => {
+    window.location.reload();
+  };
 
   return (
     <div className="h-screen w-full max-w-[430px] mx-auto relative overflow-hidden shadow-2xl bg-white">
+      {needRefresh && (
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 rounded-xl bg-blue-600 px-3 py-2 text-xs text-white shadow-lg">
+          有可用更新，<button onClick={handleRefresh} className="underline">点击刷新</button>
+        </div>
+      )}
+      {isOfflineReady && (
+        <div className="absolute top-14 left-1/2 -translate-x-1/2 z-50 rounded-xl bg-emerald-600 px-3 py-2 text-xs text-white shadow-lg">
+          离线资源已准备好，可脱机访问。
+        </div>
+      )}
+      {deferredPrompt && (
+        <div className="absolute top-24 left-1/2 -translate-x-1/2 z-50 rounded-xl bg-indigo-600 px-3 py-2 text-xs text-white shadow-lg flex items-center gap-2">
+          <span>可添加到主屏幕</span>
+          <button onClick={handleInstallClick} className="rounded bg-white px-2 py-1 text-xs font-bold text-indigo-600">安装</button>
+        </div>
+      )}
+      {installStatus && (
+        <div className="absolute top-32 left-1/2 -translate-x-1/2 z-50 rounded-xl bg-slate-800 px-3 py-2 text-xs text-white shadow-lg">
+          {installStatus}
+        </div>
+      )}
       <AnimatePresence mode="wait">
         {isLocked ? (
           !isEnteringPasscode ? (

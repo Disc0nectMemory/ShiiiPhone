@@ -1,0 +1,17 @@
+{
+  "name": "ShiiiPhone",
+  "short_name": "Shii",
+  "description": "Liquid iPhone style PWA built with Vite + React",
+  "icons": [
+    {
+      "src": "/Shii.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#0B1B40",
+  "theme_color": "#0B1B40"
+}

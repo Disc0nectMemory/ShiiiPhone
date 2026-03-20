@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, useSpring, useMotionTemplate } from 'motion/react';
-import { registerSW } from 'virtual:pwa-register';
 import { 
   Battery, 
   Wifi, 
@@ -21,14 +20,6 @@ import {
   Cloud,
   Lock,
 } from 'lucide-react';
-
-type BeforeInstallPromptEvent = Event & {
-  prompt: () => Promise<void>;
-  userChoice: Promise<{
-    outcome: 'accepted' | 'dismissed';
-    platform: string;
-  }>;
-};
 
 // --- Components ---
 
@@ -54,19 +45,19 @@ const LiquidBackground = ({ dragY }: { dragY?: any }) => {
       {/* Primary Blobs - Grayscale with more contrast */}
       <motion.div 
         style={{ y: dragY1 }} 
-        className="liquid-blob w-[600px] h-[600px] bg-slate-400/40 top-[-10%] left-[-10%] opacity-80" 
+        className="liquid-blob w-[80vw] h-[80vw] max-w-[800px] max-h-[800px] bg-slate-400/40 top-[-10%] left-[-10%] opacity-80" 
       />
       <motion.div 
         style={{ y: dragY2, animationDelay: '-7s' }} 
-        className="liquid-blob w-[500px] h-[500px] bg-zinc-500/30 bottom-[-5%] right-[-5%] opacity-70" 
+        className="liquid-blob w-[70vw] h-[70vw] max-w-[700px] max-h-[700px] bg-zinc-500/30 bottom-[-5%] right-[-5%] opacity-70" 
       />
       <motion.div 
         style={{ x: dragX1, animationDelay: '-14s' }} 
-        className="liquid-blob w-[450px] h-[450px] bg-stone-400/30 top-[20%] right-[-10%] opacity-60" 
+        className="liquid-blob w-[60vw] h-[60vw] max-w-[600px] max-h-[600px] bg-stone-400/30 top-[20%] right-[-10%] opacity-60" 
       />
       <motion.div 
         style={{ x: dragX2, animationDelay: '-21s' }} 
-        className="liquid-blob w-[550px] h-[550px] bg-gray-400/30 bottom-[10%] left-[-5%] opacity-50" 
+        className="liquid-blob w-[75vw] h-[75vw] max-w-[750px] max-h-[750px] bg-gray-400/30 bottom-[10%] left-[-5%] opacity-50" 
       />
       
       {/* Accent Blobs for Mesh Effect */}
@@ -76,7 +67,7 @@ const LiquidBackground = ({ dragY }: { dragY?: any }) => {
           opacity: [0.3, 0.5, 0.3]
         }}
         transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute top-[40%] left-[30%] w-[300px] h-[300px] bg-white/60 rounded-full blur-[80px]" 
+        className="absolute top-[40%] left-[30%] w-[40vw] h-[40vw] max-w-[400px] max-h-[400px] bg-white/60 rounded-full blur-[80px]" 
       />
       <motion.div 
         animate={{ 
@@ -84,7 +75,7 @@ const LiquidBackground = ({ dragY }: { dragY?: any }) => {
           opacity: [0.2, 0.4, 0.2]
         }}
         transition={{ duration: 18, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-        className="absolute bottom-[30%] right-[20%] w-[350px] h-[350px] bg-slate-200/40 rounded-full blur-[90px]" 
+        className="absolute bottom-[30%] right-[20%] w-[45vw] h-[45vw] max-w-[450px] max-h-[450px] bg-slate-200/40 rounded-full blur-[90px]" 
       />
 
       {/* Noise Texture */}
@@ -213,20 +204,20 @@ const LockScreen: React.FC<{ onUnlock: () => void }> = ({ onUnlock }) => {
           scale: contentScale,
           filter: contentFilter
         }}
-        className="z-20 flex flex-col items-center mt-12"
+        className="z-20 flex flex-col items-center mt-[15vh]"
       >
         <div className="flex flex-col items-center">
           <motion.div 
             initial={{ y: -10, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            className="text-black/50 text-[21px] font-semibold mb-1 tracking-tight drop-shadow-[0_1px_1px_rgba(0,0,0,0.1)]"
+            className="text-black/50 text-[clamp(18px,4vw,24px)] font-semibold mb-1 tracking-tight drop-shadow-[0_1px_1px_rgba(0,0,0,0.1)]"
           >
             {dateString}
           </motion.div>
           <motion.div 
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="text-white text-[102px] font-bold tracking-[-0.04em] leading-[1.1] drop-shadow-[0_2px_10px_rgba(0,0,0,0.25)]"
+            className="text-white text-[clamp(80px,15vw,120px)] font-bold tracking-[-0.04em] leading-[1.1] drop-shadow-[0_2px_10px_rgba(0,0,0,0.25)]"
           >
             {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
           </motion.div>
@@ -235,7 +226,7 @@ const LockScreen: React.FC<{ onUnlock: () => void }> = ({ onUnlock }) => {
 
       <motion.div 
         style={{ opacity: contentOpacity }}
-        className="z-20 w-full px-12 flex justify-between items-end"
+        className="z-20 w-full max-w-[600px] px-12 flex justify-between items-end mb-[5vh]"
       >
         <div className="ios-liquid-button">
           <Flashlight size={24} strokeWidth={1.8} />
@@ -313,7 +304,7 @@ const PasscodeScreen: React.FC<{ onCancel: () => void; onSuccess: () => void }> 
         </motion.div>
       </div>
 
-      <div className="z-20 mt-16 grid grid-cols-3 gap-x-6 gap-y-4">
+      <div className="z-20 mt-[10vh] grid grid-cols-3 gap-x-6 gap-y-4 max-w-[400px]">
         {buttons.slice(0, 9).map((btn) => (
           <button key={btn.num} onClick={() => handleNumber(btn.num)} className="keypad-button">
             <span className="text-[32px] font-medium leading-none">{btn.num}</span>
@@ -327,7 +318,7 @@ const PasscodeScreen: React.FC<{ onCancel: () => void; onSuccess: () => void }> 
         <div />
       </div>
 
-      <div className="z-20 mt-auto w-full px-12 flex justify-between items-center text-white font-semibold text-[17px] drop-shadow-md">
+      <div className="z-20 mt-auto w-full max-w-[400px] px-12 flex justify-between items-center text-white font-semibold text-[17px] drop-shadow-md mb-[5vh]">
         <button className="active:opacity-40 transition-opacity">紧急情况</button>
         <button onClick={onCancel} className="active:opacity-40 transition-opacity">取消</button>
       </div>
@@ -377,14 +368,14 @@ const HomeScreen: React.FC = () => {
       <StatusBar dark={true} />
 
       {/* App Grid */}
-      <div className="flex-1 px-7 pt-16 grid grid-cols-4 gap-x-4 gap-y-7 content-start z-10">
+      <div className="flex-1 px-7 pt-16 grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-x-4 gap-y-7 content-start z-10 overflow-y-auto pb-32">
         {apps.map((app, i) => (
           <AppIcon key={i} {...app} />
         ))}
       </div>
 
       {/* Search Pill */}
-      <div className="flex justify-center mb-5 z-10">
+      <div className="fixed bottom-[140px] left-1/2 -translate-x-1/2 z-10">
         <div className="liquid-glass-dark px-4 py-1.5 rounded-full flex items-center gap-1.5">
           <Search size={12} className="text-black/40" strokeWidth={3} />
           <span className="text-[11px] text-black/60 font-bold tracking-tight">搜索</span>
@@ -392,13 +383,13 @@ const HomeScreen: React.FC = () => {
       </div>
 
       {/* Page Indicator */}
-      <div className="flex justify-center gap-2 mb-4 z-10">
+      <div className="fixed bottom-[115px] left-1/2 -translate-x-1/2 flex justify-center gap-2 z-10">
         <div className="w-1.5 h-1.5 rounded-full bg-black/60" />
         <div className="w-1.5 h-1.5 rounded-full bg-black/10" />
       </div>
 
       {/* Dock */}
-      <div className="px-4 pb-4 z-10">
+      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 w-full max-w-[95%] sm:max-w-[600px] px-4 z-10">
         <div className="liquid-glass rounded-[38px] px-4 py-4 flex justify-around items-center">
           <AppIcon icon={Phone} color="bg-green-500" showLabel={false} />
           <AppIcon icon={Compass} color="bg-white" showLabel={false} />
@@ -420,81 +411,9 @@ const HomeScreen: React.FC = () => {
 export default function App() {
   const [isLocked, setIsLocked] = useState(true);
   const [isEnteringPasscode, setIsEnteringPasscode] = useState(false);
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [installStatus, setInstallStatus] = useState('');
-  const [isOfflineReady, setOfflineReady] = useState(false);
-  const [needRefresh, setNeedRefresh] = useState(false);
-
-  useEffect(() => {
-    const unregister = registerSW({
-      onNeedRefresh() {
-        setNeedRefresh(true);
-      },
-      onOfflineReady() {
-        setOfflineReady(true);
-      },
-    });
-
-    const beforeInstallHandler = (event: Event) => {
-      const e = event as BeforeInstallPromptEvent;
-      e.preventDefault();
-      setDeferredPrompt(e);
-    };
-
-    const appInstalledHandler = () => {
-      setInstallStatus('已安装到主屏幕');
-      setDeferredPrompt(null);
-    };
-
-    window.addEventListener('beforeinstallprompt', beforeInstallHandler);
-    window.addEventListener('appinstalled', appInstalledHandler);
-
-    return () => {
-      unregister();
-      window.removeEventListener('beforeinstallprompt', beforeInstallHandler);
-      window.removeEventListener('appinstalled', appInstalledHandler);
-    };
-  }, []);
-
-  const handleInstallClick = async () => {
-    if (!deferredPrompt) return;
-    deferredPrompt.prompt();
-    const choiceResult = await deferredPrompt.userChoice;
-    if (choiceResult.outcome === 'accepted') {
-      setInstallStatus('用户接受安装');
-    } else {
-      setInstallStatus('用户取消安装');
-    }
-    setDeferredPrompt(null);
-  };
-
-  const handleRefresh = () => {
-    window.location.reload();
-  };
 
   return (
-    <div className="h-screen w-full max-w-[430px] mx-auto relative overflow-hidden shadow-2xl bg-white">
-      {needRefresh && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 rounded-xl bg-blue-600 px-3 py-2 text-xs text-white shadow-lg">
-          有可用更新，<button onClick={handleRefresh} className="underline">点击刷新</button>
-        </div>
-      )}
-      {isOfflineReady && (
-        <div className="absolute top-14 left-1/2 -translate-x-1/2 z-50 rounded-xl bg-emerald-600 px-3 py-2 text-xs text-white shadow-lg">
-          离线资源已准备好，可脱机访问。
-        </div>
-      )}
-      {deferredPrompt && (
-        <div className="absolute top-24 left-1/2 -translate-x-1/2 z-50 rounded-xl bg-indigo-600 px-3 py-2 text-xs text-white shadow-lg flex items-center gap-2">
-          <span>可添加到主屏幕</span>
-          <button onClick={handleInstallClick} className="rounded bg-white px-2 py-1 text-xs font-bold text-indigo-600">安装</button>
-        </div>
-      )}
-      {installStatus && (
-        <div className="absolute top-32 left-1/2 -translate-x-1/2 z-50 rounded-xl bg-slate-800 px-3 py-2 text-xs text-white shadow-lg">
-          {installStatus}
-        </div>
-      )}
+    <div className="h-screen w-full relative overflow-hidden bg-white">
       <AnimatePresence mode="wait">
         {isLocked ? (
           !isEnteringPasscode ? (

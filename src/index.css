@@ -5,30 +5,21 @@
 }
 
 @layer base {
-  html, body {
-    @apply bg-[#e0e0e5] text-black antialiased;
-    font-family: var(--font-sans);
-    touch-action: none;
-    overscroll-behavior: none;
-    
-    /* Force full-screen viewport coverage */
-    height: 100vh;
-    height: 100dvh;
-    width: 100vw;
-    width: 100dvw;
-    
-    margin: 0;
-    padding: 0;
-    position: fixed;
-    overflow: hidden;
-    inset: 0;
-  }
-  #root {
-    height: 100%;
-    width: 100%;
-    position: fixed;
-    inset: 0;
-    overflow: hidden;
+html, body {
+  height: 100dvh;
+  width: 100vw;
+}
+
+body {
+  @apply bg-white text-black antialiased;
+  font-family: var(--font-sans);
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+  * {
+    -webkit-tap-highlight-color: transparent;
   }
 }
 
@@ -63,7 +54,7 @@
   }
 
   .keypad-button {
-    @apply w-[72px] h-[72px] rounded-full flex flex-col items-center justify-center text-white transition-colors;
+    @apply w-[72px] h-[72px] rounded-full flex flex-col items-center justify-center text-white transition-colors duration-75;
     background: rgba(255, 255, 255, 0.15);
     backdrop-filter: blur(20px);
     border: 0.5px solid rgba(255, 255, 255, 0.2);
@@ -74,7 +65,7 @@
   }
 
   .passcode-dot {
-    @apply w-3 h-3 rounded-full border-[1.5px] border-white transition-colors;
+    @apply w-3 h-3 rounded-full border-[1.5px] border-white transition-colors duration-75;
   }
 
   .passcode-dot.filled {

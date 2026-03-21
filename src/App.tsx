@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence, useMotionValue, useTransform, useSpring, useMotionTemplate, MotionValue } from 'motion/react';
+import { motion, AnimatePresence, useMotionValue, useTransform, useSpring, useMotionTemplate, MotionValue, animate } from 'motion/react';
+import ImageCropper from './components/ImageCropper';
 import { 
   Camera, 
   Flashlight, 
@@ -23,13 +24,13 @@ import {
 
 // --- Components ---
 
-const LiquidBackground = ({ dragY }: { dragY?: any }) => {
+const LiquidBackground = ({ dragY }: { dragY?: MotionValue<number> }) => {
   const defaultDragY = useMotionValue(0);
-  const activeDragY = dragY || defaultDragY;
+  const activeDragY = (dragY || defaultDragY) as MotionValue<number>;
   
   const blurValue = useTransform(activeDragY, [0, -400], [60, 100]);
   const scaleValue = useTransform(activeDragY, [0, -400], [1, 1.15]);
-  const filterValue = useMotionTemplate`blur(${blurValue}px)`;
+  const filterValue = useTransform(blurValue, (v) => `blur(${v}px)`);
   
   // Dynamic blob movements based on drag
   const dragY1 = useTransform(activeDragY, [0, -400], [0, -120]);
@@ -53,7 +54,7 @@ const LiquidBackground = ({ dragY }: { dragY?: any }) => {
     <motion.div 
       onClick={toggleFullscreen}
       style={{ filter: filterValue, scale: scaleValue }}
-      className="fixed inset-0 z-0 overflow-hidden bg-[#e0e0e5] cursor-pointer"
+      className="absolute inset-0 z-0 overflow-hidden bg-[#e0e0e5] cursor-pointer"
     >
       {/* Primary Blobs - Grayscale with more contrast */}
       <motion.div 
@@ -100,49 +101,31 @@ const LiquidBackground = ({ dragY }: { dragY?: any }) => {
   );
 };
 
-const LockScreen: React.FC<{ onUnlock: () => void; dragY: any }> = ({ onUnlock, dragY }) => {
+const LockScreen: React.FC<{ onUnlock: () => void; dragY: MotionValue<number> }> = ({ onUnlock, dragY }) => {
   const [time, setTime] = useState(new Date());
-  const smoothDragY = useSpring(dragY, { damping: 25, stiffness: 120 }) as any;
+  const smoothDragY = useSpring(dragY as any, { damping: 25, stiffness: 120 }) as unknown as MotionValue<number>;
   
   const contentOpacity = useTransform(smoothDragY, [0, -250], [1, 0]);
   const contentScale = useTransform(smoothDragY, [0, -250], [1, 0.85]);
   const contentBlurValue = useTransform(smoothDragY, [0, -250], [0, 15]);
-  const contentFilter = useMotionTemplate`blur(${contentBlurValue}px)`;
+  const contentFilter = useTransform(contentBlurValue, (v) => `blur(${v}px)`);
   
   const glassOpacity = useTransform(smoothDragY, [0, -150], [0, 0.6]);
   const glassBlur = useTransform(smoothDragY, [0, -400], [0, 60]);
-  const backdropFilter = useMotionTemplate`blur(${glassBlur}px)`;
+  const backdropFilter = useTransform(glassBlur, (v) => `blur(${v}px)`);
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
-  const dateString = time.toLocaleDateString('zh-CN', { 
-    month: 'long', 
-    day: 'numeric', 
-    weekday: 'long' 
-  });
-
-  const handleDragEnd = (_: any, info: any) => {
-    if (info.offset.y < -150) {
-      onUnlock();
-    }
-  };
+  const weekDays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+  const dateString = `${time.getMonth() + 1}月${time.getDate()}日${weekDays[time.getDay()]}`;
 
   return (
-    <motion.div 
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0, scale: 1.2, filter: 'blur(60px)' }}
-      transition={{ duration: 0.8, ease: [0.32, 0.72, 0, 1] }}
-      drag="y"
-      dragConstraints={{ top: -600, bottom: 0 }}
-      dragElastic={{ top: 0.15, bottom: 0 }}
-      onDragEnd={handleDragEnd}
-      style={{ y: smoothDragY }}
-      className="fixed inset-0 flex flex-col items-center justify-between pt-[calc(4rem+env(safe-area-inset-top))] pb-[calc(1.5rem+env(safe-area-inset-bottom))] overflow-hidden touch-none"
-    >
+    <div className="relative h-screen w-full flex flex-col items-center justify-between pt-16 pb-6 overflow-hidden select-none touch-none">
+      <LiquidBackground dragY={smoothDragY} />
+      
       {/* Liquid Glass Overlay during swipe */}
       <motion.div 
         style={{ 
@@ -169,24 +152,24 @@ const LockScreen: React.FC<{ onUnlock: () => void; dragY: any }> = ({ onUnlock, 
         }}
         className="z-20 flex flex-col items-center mt-[2vh]"
       >
-        <div className="flex flex-col items-center gap-2">
+        <div className="flex flex-col items-center gap-0">
           <motion.div 
             initial={{ y: -10, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            className="text-black/50 text-[clamp(18px,4vw,24px)] font-semibold tracking-tight drop-shadow-[0_1px_1px_rgba(0,0,0,0.1)]"
-            style={{ fontFamily: 'system-ui' }}
+            className="text-[#707072] text-[22px] font-semibold tracking-tight"
           >
             {dateString}
           </motion.div>
           <motion.div 
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="text-white font-bold tracking-[-0.04em] drop-shadow-[0_2px_10px_rgba(0,0,0,0.25)] flex justify-center items-center"
+            className="text-white font-bold tracking-[-0.04em] drop-shadow-[0_1px_4px_rgba(0,0,0,0.2)] flex justify-center items-center"
             style={{ 
               fontFamily: 'Georgia',
               fontSize: '106px',
               lineHeight: '85px',
-              width: '280px'
+              width: '280px',
+              marginTop: '5px'
             }}
           >
             {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
@@ -198,65 +181,57 @@ const LockScreen: React.FC<{ onUnlock: () => void; dragY: any }> = ({ onUnlock, 
         style={{ opacity: contentOpacity }}
         className="z-20 w-full flex flex-col items-center mb-0 gap-4"
       >
-        <div className="w-full max-w-[600px] px-12 flex justify-between items-end pb-4">
-          <div className="ios-liquid-button">
+        <div className="w-full max-w-[600px] px-12 flex justify-between items-end pb-12">
+          <motion.div whileTap={{ scale: 0.9 }} className="ios-liquid-button cursor-pointer outline-none">
             <Flashlight size={24} strokeWidth={1.8} />
-          </div>
+          </motion.div>
           
-          <div className="ios-liquid-button">
+          <motion.div whileTap={{ scale: 0.9 }} className="ios-liquid-button cursor-pointer outline-none">
             <Camera size={24} strokeWidth={1.8} />
-          </div>
+          </motion.div>
         </div>
       </motion.div>
-    </motion.div>
+    </div>
   );
 };
 
-const PasscodeScreen: React.FC<{ onCancel: () => void; onSuccess: () => void }> = ({ onCancel, onSuccess }) => {
+const PasscodeScreen: React.FC<{ onCancel: () => void; onSuccess: () => void; dragY: MotionValue<number> }> = ({ onCancel, onSuccess, dragY }) => {
   const [passcode, setPasscode] = useState('');
   const [error, setError] = useState(false);
-
-  // Use a ref to track if we're currently in an error state to prevent inputs
-  const isErrorRef = useRef(false);
+  const passcodeRef = useRef('');
+  const smoothDragY = useSpring(dragY as any, { damping: 25, stiffness: 120 }) as unknown as MotionValue<number>;
 
   const handleNumber = (num: string) => {
-    if (isErrorRef.current) return;
-
-    // Immediate haptic feedback
-    if (window.navigator && window.navigator.vibrate) {
-      window.navigator.vibrate(10);
-    }
-
-    setPasscode((prev) => {
-      if (prev.length >= 4) return prev;
-      const next = prev + num;
+    if (error) return;
+    if (navigator.vibrate) navigator.vibrate(10);
+    if (passcodeRef.current.length < 4) {
+      const next = passcodeRef.current + num;
+      passcodeRef.current = next;
+      setPasscode(next);
       
       if (next.length === 4) {
         if (next === '0000') {
-          // Success - use a small delay to let the last dot fill
-          setTimeout(onSuccess, 50);
+          onSuccess();
         } else {
-          isErrorRef.current = true;
           setError(true);
+          if (navigator.vibrate) navigator.vibrate([50, 30, 50]);
           setTimeout(() => {
+            passcodeRef.current = '';
             setPasscode('');
             setError(false);
-            isErrorRef.current = false;
           }, 500);
         }
       }
-      return next;
-    });
+    }
   };
 
   const handleDelete = () => {
-    if (isErrorRef.current) return;
-
-    if (window.navigator && window.navigator.vibrate) {
-      window.navigator.vibrate(10);
+    if (error) return;
+    if (passcodeRef.current.length > 0) {
+      const next = passcodeRef.current.slice(0, -1);
+      passcodeRef.current = next;
+      setPasscode(next);
     }
-
-    setPasscode((prev) => prev.slice(0, -1));
   };
 
   const buttons = [
@@ -271,20 +246,21 @@ const PasscodeScreen: React.FC<{ onCancel: () => void; onSuccess: () => void }> 
     { num: '9', letters: 'WXYZ' },
   ];
 
-  const keypadWidth = 264; // 72*3 + 24*2
-
   return (
     <motion.div 
-      initial={{ opacity: 0, scale: 1.1 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 1.1, filter: 'blur(30px)' }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0, filter: 'blur(30px)' }}
       transition={{ duration: 0.6, ease: [0.32, 0.72, 0, 1] }}
-      className="fixed inset-0 z-50 flex flex-col items-center pt-[calc(5rem+env(safe-area-inset-top))] pb-[calc(3rem+env(safe-area-inset-bottom))] overflow-hidden touch-none bg-black/5 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex flex-col items-center pt-20 pb-12 overflow-hidden bg-black/20 backdrop-blur-sm select-none touch-none"
     >
-      <div className="z-20 flex flex-col items-center mt-[8vh] gap-4">
+      <LiquidBackground dragY={smoothDragY} />
+      <div className="absolute inset-0 bg-black/40 z-10 pointer-events-none" />
+
+      <div className="z-20 flex flex-col items-center mt-[8vh] gap-6">
         <div 
-          className="text-white font-medium tracking-wide"
-          style={{ fontFamily: 'system-ui', fontSize: '20px' }}
+          className="text-white font-normal tracking-wide"
+          style={{ fontSize: '20px' }}
         >
           输入密码
         </div>
@@ -297,8 +273,8 @@ const PasscodeScreen: React.FC<{ onCancel: () => void; onSuccess: () => void }> 
           {[0, 1, 2, 3].map((i) => (
             <div 
               key={i} 
-              className={`w-2.5 h-2.5 rounded-full border-[1.5px] border-white transition-colors duration-200 ${
-                passcode.length > i ? 'bg-white' : 'bg-transparent'
+              className={`passcode-dot ${
+                passcode.length > i ? 'filled' : ''
               }`} 
             />
           ))}
@@ -307,160 +283,292 @@ const PasscodeScreen: React.FC<{ onCancel: () => void; onSuccess: () => void }> 
 
       <div className="z-20 mt-[7vh] grid grid-cols-3 gap-x-[24px] gap-y-[16px]">
         {buttons.map((btn) => (
-          <motion.button 
+          <button 
             key={btn.num} 
-            whileTap={{ backgroundColor: 'rgba(255, 255, 255, 0.4)', scale: 0.92 }}
-            transition={{ type: 'spring', stiffness: 600, damping: 20 }}
             onPointerDown={(e) => {
-              // Use pointerdown for the absolute fastest response
               e.preventDefault();
               handleNumber(btn.num);
-            }}
-            className="keypad-button"
+            }} 
+            className="keypad-button outline-none"
           >
-            <span className="text-[32px] font-normal leading-none pointer-events-none">{btn.num}</span>
+            <span className="text-[32px] font-bold leading-none">{btn.num}</span>
             {btn.letters && (
-              <span className="text-[9px] font-bold tracking-[0.05em] mt-0.5 opacity-90 pointer-events-none">{btn.letters}</span>
+              <span className="text-[9px] font-bold tracking-[0.05em] mt-0.5 opacity-90">{btn.letters}</span>
             )}
-          </motion.button>
+          </button>
         ))}
         <div />
-        <motion.button 
-          whileTap={{ backgroundColor: 'rgba(255, 255, 255, 0.4)', scale: 0.92 }}
-          transition={{ type: 'spring', stiffness: 600, damping: 20 }}
+        <button 
           onPointerDown={(e) => {
             e.preventDefault();
             handleNumber('0');
-          }}
-          className="keypad-button"
+          }} 
+          className="keypad-button outline-none"
         >
-          <span className="text-[32px] font-normal leading-none pointer-events-none">0</span>
-        </motion.button>
+          <span className="text-[32px] font-bold leading-none">0</span>
+        </button>
         <div />
       </div>
 
-      <button 
-        className="z-20 absolute text-white font-normal active:opacity-40 transition-opacity drop-shadow-md" 
-        style={{ 
-          fontFamily: 'system-ui', 
-          fontSize: '16px',
-          left: `calc((100vw - ${keypadWidth}px) / 2)`,
-          bottom: `calc((100vw - ${keypadWidth}px) / 2)`
-        }}
-      >
-        紧急情况
-      </button>
-      <button 
-        onPointerDown={(e) => {
-          e.preventDefault();
-          if (passcode.length > 0) {
-            handleDelete();
-          } else {
-            onCancel();
-          }
-        }}
-        className="z-20 absolute text-white font-normal active:opacity-40 transition-opacity drop-shadow-md min-w-[40px] text-right" 
-        style={{ 
-          fontFamily: 'system-ui', 
-          fontSize: '16px',
-          right: `calc((100vw - ${keypadWidth}px) / 2)`,
-          bottom: `calc((100vw - ${keypadWidth}px) / 2)`
-        }}
-      >
-        {passcode.length > 0 ? '删除' : '取消'}
-      </button>
+      <div className="z-20 mt-auto w-full max-w-[320px] flex justify-between items-center px-8 pb-12">
+        <button 
+          className="text-white font-normal active:opacity-40 transition-opacity outline-none" 
+          style={{ 
+            fontSize: '16px',
+          }}
+        >
+          紧急情况
+        </button>
+        <button 
+          onPointerDown={(e) => {
+            e.preventDefault();
+            if (passcode.length > 0) {
+              handleDelete();
+            } else {
+              onCancel();
+            }
+          }}
+          className="text-white font-normal active:opacity-40 transition-opacity w-[64px] text-right outline-none" 
+          style={{ 
+            fontSize: '16px',
+          }}
+        >
+          {passcode.length > 0 ? '删除' : '取消'}
+        </button>
+      </div>
     </motion.div>
   );
 };
 
-const AppIcon = ({ icon: Icon, label, color, onClick, showLabel = true }: any) => (
-  <motion.div 
-    whileTap={{ scale: 0.9 }}
-    className="flex flex-col items-center gap-1.5"
-    onClick={onClick}
+const AppIcon = ({ icon: Icon, label, color, onClick, showLabel = true, className = "", iconSize = 32 }: any) => (
+  <div 
+    className={`flex flex-col items-center gap-1.5 cursor-pointer select-none ${className}`}
+    onClick={(e) => {
+      e.stopPropagation();
+      onClick?.();
+    }}
   >
-    <div className={`w-[60px] h-[60px] rounded-[18px] flex items-center justify-center shadow-lg relative overflow-hidden ${color}`}>
+    <motion.div 
+      whileTap={{ scale: 0.9 }}
+      className={`w-full aspect-square rounded-[22px] flex items-center justify-center shadow-sm relative overflow-hidden outline-none ${color}`}
+    >
       {/* Liquid Overlay */}
-      <div className="absolute inset-0 bg-white/10 backdrop-blur-[2px]" />
-      <Icon size={38} color={color === 'bg-white' ? '#1c1c1e' : 'white'} strokeWidth={1.5} className="relative z-10" />
-    </div>
+      <div className="absolute inset-0 bg-white/5 backdrop-blur-[2px]" />
+      {Icon && <Icon size={iconSize} color={color.includes('white') || color.includes('100') || color.includes('200') ? '#1c1c1e' : 'white'} strokeWidth={1.5} className="relative z-10 opacity-60" />}
+    </motion.div>
     {showLabel && <span className="text-[12px] text-black/80 font-medium tracking-tight">{label}</span>}
-  </motion.div>
+  </div>
 );
 
-const HomeScreen: React.FC<{ onLock: () => void }> = ({ onLock }) => {
-  const apps: any[] = [];
-  const dragY = useMotionValue(0);
-  const pullDownOpacity = useTransform(dragY, [0, 100], [0, 1]);
-  const pullDownScale = useTransform(dragY, [0, 100], [0.8, 1]);
-  const pullDownShadow = useTransform(
-    dragY, 
-    [0, 40], 
-    ["0px 0px 0px rgba(0,0,0,0)", "0px 50px 100px -20px rgba(0,0,0,0.5)"]
-  );
+const SettingsApp = ({ onClose }: { onClose: () => void }) => {
+  return (
+    <motion.div
+      initial={{ y: '100%' }}
+      animate={{ y: 0 }}
+      exit={{ y: '100%' }}
+      transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+      className="absolute inset-0 z-[60] bg-[#f2f2f7] flex flex-col pt-12 select-none"
+    >
+      <div className="absolute top-14 left-0 right-0 flex justify-center pointer-events-none">
+        <span className="text-[17px] font-semibold text-black/90">设置</span>
+      </div>
+      
+      <div className="flex-1" />
 
-  const handleDragEnd = (_: any, info: any) => {
-    if (info.offset.y > 120) {
-      onLock();
+      {/* Home Indicator to close */}
+      <div className="fixed bottom-2 left-1/2 -translate-x-1/2 z-[70]">
+        <div 
+          onClick={onClose}
+          className="w-32 h-1 bg-black/20 rounded-full cursor-pointer outline-none" 
+        />
+      </div>
+    </motion.div>
+  );
+};
+
+const HomeScreen: React.FC<{ isLocked: boolean; onOpenApp: (app: string) => void; scale?: MotionValue<number> }> = ({ isLocked, onOpenApp, scale }) => {
+  const [widgetImages, setWidgetImages] = useState<Record<string, string>>({});
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [activeWidgetId, setActiveWidgetId] = useState<string | null>(null);
+  const [pendingImage, setPendingImage] = useState<string | null>(null);
+
+  const handleWidgetClick = (id: string) => {
+    setActiveWidgetId(id);
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && activeWidgetId) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setPendingImage(event.target?.result as string);
+      };
+      reader.readAsDataURL(file);
     }
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleCropComplete = (croppedImageUrl: string) => {
+    if (activeWidgetId) {
+      setWidgetImages(prev => ({
+        ...prev,
+        [activeWidgetId]: croppedImageUrl
+      }));
+    }
+    setPendingImage(null);
+    setActiveWidgetId(null);
+  };
+
+  const handleCropCancel = () => {
+    setPendingImage(null);
+    setActiveWidgetId(null);
   };
 
   return (
     <motion.div 
-      initial={{ opacity: 0, scale: 1.1 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.9, filter: 'blur(20px)' }}
+      initial={false}
+      style={{ scale }}
+      animate={{ 
+        opacity: isLocked ? 0 : 1, 
+        scale: isLocked ? 1.1 : 1,
+        pointerEvents: isLocked ? 'none' : 'auto'
+      }}
       transition={{ duration: 0.5, ease: [0.32, 0.72, 0, 1] }}
-      className="fixed inset-0 flex flex-col overflow-hidden"
+      className="relative h-screen w-full flex flex-col"
     >
-      {/* Pull down to lock sheet - iOS 26 style full sheet */}
-      <motion.div
-        drag="y"
-        dragConstraints={{ top: 0, bottom: 350 }}
-        dragElastic={0.05}
-        onDragEnd={handleDragEnd}
-        style={{ y: dragY, boxShadow: pullDownShadow }}
-        className="absolute top-[-440px] left-0 right-0 h-[440px] z-[60] flex flex-col items-center justify-end bg-white/20 backdrop-blur-2xl rounded-b-[60px] border-b border-white/30 touch-none"
-      >
-        {/* Invisible Drag Handle - Extends below the panel to catch the initial pull */}
-        <div className="absolute bottom-[-80px] left-0 right-0 h-[80px] cursor-grab active:cursor-grabbing z-[70]" />
-        
-        <div className="flex flex-col items-center gap-4 pb-12 pointer-events-none">
-          <motion.div 
-            style={{ opacity: pullDownOpacity, scale: pullDownScale }}
-            className="flex flex-col items-center gap-3"
-          >
-            <Lock size={32} className="text-black/40" strokeWidth={1.2} />
-            <div className="w-24 h-2 bg-black/10 rounded-full" />
-          </motion.div>
-        </div>
-      </motion.div>
+      <LiquidBackground />
+
+      {pendingImage && activeWidgetId && (
+        <ImageCropper
+          imageSrc={pendingImage}
+          widgetId={activeWidgetId}
+          onCropComplete={handleCropComplete}
+          onCancel={handleCropCancel}
+        />
+      )}
+
+      <input 
+        type="file" 
+        accept="image/*" 
+        className="hidden" 
+        ref={fileInputRef} 
+        onChange={handleFileChange} 
+      />
 
       {/* App Grid */}
-      <div className="flex-1 px-7 pt-[calc(4rem+env(safe-area-inset-top))] grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-x-4 gap-y-7 content-start z-10 overflow-y-auto pb-[calc(8rem+env(safe-area-inset-bottom))]">
-        {apps.map((app, i) => (
-          <AppIcon key={i} {...app} />
-        ))}
+      <div className="flex-1 px-8 pt-16 z-10 overflow-y-auto pb-[200px] flex flex-col">
+        <div className="grid grid-cols-4 gap-4 auto-rows-auto mt-auto">
+          {/* Row 1 */}
+          <motion.div 
+            whileTap={{ scale: 0.95 }}
+            onClick={() => handleWidgetClick('circle-1')}
+            className="col-span-1 aspect-square bg-white/90 rounded-full shadow-sm flex items-center justify-center relative overflow-hidden cursor-pointer"
+          >
+            {widgetImages['circle-1'] && <img src={widgetImages['circle-1']} alt="" className="absolute inset-0 w-full h-full object-cover" />}
+          </motion.div>
+          <motion.div whileTap={{ scale: 0.95 }} className="col-span-3 bg-white/90 rounded-full shadow-sm p-4 flex flex-col justify-center relative overflow-hidden cursor-pointer" />
+          
+          {/* Row 2 */}
+          <motion.div whileTap={{ scale: 0.95 }} className="col-span-1 aspect-square bg-white/90 rounded-[22px] shadow-sm flex items-center justify-center relative overflow-hidden cursor-pointer" />
+          <motion.div whileTap={{ scale: 0.95 }} className="col-span-1 aspect-square bg-white/90 rounded-[22px] shadow-sm flex items-center justify-center relative overflow-hidden cursor-pointer" />
+          <motion.div 
+            whileTap={{ scale: 0.95 }}
+            onClick={() => handleWidgetClick('large-square')}
+            className="col-span-2 row-span-2 bg-white/90 rounded-[32px] shadow-sm p-5 flex flex-col relative overflow-hidden cursor-pointer"
+          >
+            {widgetImages['large-square'] && <img src={widgetImages['large-square']} alt="" className="absolute inset-0 w-full h-full object-cover" />}
+          </motion.div>
+          
+          {/* Row 3 */}
+          <motion.div whileTap={{ scale: 0.95 }} className="col-span-1 aspect-square bg-zinc-200/80 rounded-[22px] shadow-sm flex items-center justify-center relative overflow-hidden cursor-pointer" />
+          <motion.div whileTap={{ scale: 0.95 }} className="col-span-1 aspect-square bg-zinc-200/80 rounded-[22px] shadow-sm flex items-center justify-center relative overflow-hidden cursor-pointer" />
+
+          {/* Row 4 */}
+          <motion.div 
+            whileTap={{ scale: 0.95 }}
+            onClick={() => handleWidgetClick('donut')}
+            className="col-span-2 row-span-2 aspect-square drop-shadow-[0_8px_16px_rgba(0,0,0,0.15)] cursor-pointer rounded-full"
+          >
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+              style={{ 
+                WebkitMaskImage: 'radial-gradient(circle, transparent 15%, black 16%)', 
+                maskImage: 'radial-gradient(circle, transparent 15%, black 16%)' 
+              }}
+              className="w-full h-full bg-gradient-to-tr from-zinc-400 via-zinc-200 to-zinc-50 rounded-full relative overflow-hidden"
+            >
+               {widgetImages['donut'] && <img src={widgetImages['donut']} alt="" className="absolute inset-0 w-full h-full object-cover" />}
+            </motion.div>
+          </motion.div>
+          <motion.div whileTap={{ scale: 0.95 }} className="col-span-1 aspect-square bg-zinc-300/80 rounded-[22px] shadow-sm flex items-center justify-center relative overflow-hidden cursor-pointer" />
+          <motion.div whileTap={{ scale: 0.95 }} className="col-span-1 aspect-square bg-zinc-400/80 rounded-[22px] shadow-sm flex items-center justify-center relative overflow-hidden cursor-pointer" />
+
+          {/* Row 5 */}
+          <motion.div whileTap={{ scale: 0.95 }} className="col-span-1 aspect-square bg-zinc-100/80 rounded-[22px] shadow-sm flex items-center justify-center relative overflow-hidden cursor-pointer" />
+          <motion.div whileTap={{ scale: 0.95 }} className="col-span-1 aspect-square bg-zinc-100/80 rounded-[22px] shadow-sm flex items-center justify-center relative overflow-hidden cursor-pointer" />
+
+          {/* Row 6 */}
+          <motion.div 
+            whileTap={{ scale: 0.95 }}
+            onClick={() => handleWidgetClick('rect-ears')}
+            className="col-span-4 aspect-[4/1.4] mt-4 relative cursor-pointer drop-shadow-md pointer-events-none"
+          >
+             {/* Left Ear */}
+             <div className="absolute top-0 left-8 w-12 h-full overflow-hidden rounded-t-2xl bg-white/90 pointer-events-auto">
+               {widgetImages['rect-ears'] && (
+                 <img src={widgetImages['rect-ears']} className="absolute top-0 left-[-32px] w-[calc(100vw-4rem)] h-full object-cover max-w-none" alt="" />
+               )}
+             </div>
+             {/* Right Ear */}
+             <div className="absolute top-0 right-8 w-12 h-full overflow-hidden rounded-t-2xl bg-white/90 pointer-events-auto">
+               {widgetImages['rect-ears'] && (
+                 <img src={widgetImages['rect-ears']} className="absolute top-0 right-[-32px] w-[calc(100vw-4rem)] h-full object-cover max-w-none" alt="" />
+               )}
+             </div>
+             {/* Main Body */}
+             <div className="absolute bottom-0 left-0 right-0 h-[85%] overflow-hidden rounded-[32px] bg-white/90 pointer-events-auto">
+               {widgetImages['rect-ears'] && (
+                 <img src={widgetImages['rect-ears']} className="absolute bottom-0 left-0 w-full h-[calc(100%/0.85)] object-cover" alt="" />
+               )}
+             </div>
+             
+             {/* Inner shadow for main body to make ears look like they are behind */}
+             <div className="absolute bottom-0 left-0 right-0 h-[85%] rounded-[32px] shadow-[inset_0_4px_10px_rgba(0,0,0,0.05)] pointer-events-none z-20" />
+          </motion.div>
+        </div>
       </div>
 
       {/* Search Pill */}
-      <div className="fixed bottom-[calc(124px+env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 z-20">
-        <div className="liquid-glass-dark px-3 py-1 rounded-full flex items-center gap-1.5 bg-black/10 border-none shadow-none">
-          <Search size={11} className="text-black/30" strokeWidth={3.5} />
-          <span className="text-[10px] text-black/50 font-bold tracking-tight">搜索</span>
+      <motion.div whileTap={{ scale: 0.95 }} className="fixed bottom-[140px] left-1/2 -translate-x-1/2 z-10 cursor-pointer">
+        <div className="liquid-glass-dark px-4 py-1.5 rounded-full flex items-center gap-1.5 bg-black/5 border-none shadow-none">
+          <Search size={12} className="text-black/40" strokeWidth={3} />
+          <span className="text-[11px] text-black/60 font-medium tracking-tight">搜索</span>
         </div>
-      </div>
+      </motion.div>
 
       {/* Dock */}
-      <div className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 w-full max-w-[95%] sm:max-w-[600px] px-4 z-10">
-        <div className="liquid-glass rounded-[38px] px-4 py-4 flex justify-around items-center min-h-[92px]">
-          {/* Dock is empty */}
+      <div className="fixed bottom-5 left-0 right-0 px-4 z-10">
+        <div className="liquid-glass rounded-[34px] px-4 py-[14px]">
+          <div className="grid grid-cols-4 gap-4">
+            {[
+              { color: 'bg-zinc-900' },
+              { color: 'bg-zinc-800' },
+              { color: 'bg-zinc-600' },
+              { color: 'bg-zinc-400', icon: Settings, iconSize: 18, onClick: () => onOpenApp('settings') },
+            ].map((app, i) => (
+              <AppIcon key={i} {...app} showLabel={false} />
+            ))}
+          </div>
         </div>
       </div>
 
       {/* Home Indicator */}
-      <div className="flex justify-center pb-[env(safe-area-inset-bottom)] z-10">
-        <div className="w-32 h-1.25 bg-white/20 rounded-full" />
+      <div className="fixed bottom-2 left-1/2 -translate-x-1/2 z-20">
+        <div className="w-32 h-1 bg-black/20 rounded-full" />
       </div>
     </motion.div>
   );
@@ -471,30 +579,170 @@ const HomeScreen: React.FC<{ onLock: () => void }> = ({ onLock }) => {
 export default function App() {
   const [isLocked, setIsLocked] = useState(true);
   const [isEnteringPasscode, setIsEnteringPasscode] = useState(false);
-  
-  // Shared drag value for background interaction on lock screen
-  const lockDragY = useMotionValue(0);
+  const [activeApp, setActiveApp] = useState<string | null>(null);
+
+  const pullOffset = useMotionValue(0);
+  const [isDraggingLock, setIsDraggingLock] = useState(false);
+  const [isCancellingDrag, setIsCancellingDrag] = useState(false);
+  const startY = useRef(0);
+  const lastY = useRef(0);
+  const lastTime = useRef(0);
+  const velocity = useRef(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const lockScreenPullDownY = useTransform(pullOffset, v => v - window.innerHeight);
+  const homeScreenScale = useTransform(pullOffset, (v) => {
+    if (isLocked) return 1.1;
+    if (v <= 0) return 1;
+    const progress = Math.min(v / (window.innerHeight * 0.4), 1);
+    return 1 + progress * 0.1;
+  });
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleTouchMove = (e: TouchEvent) => {
+      // Prevent default browser scrolling only when we are actively dragging for our gestures
+      if (isDraggingLock) {
+        e.preventDefault();
+      }
+    };
+
+    container.addEventListener('touchmove', handleTouchMove, { passive: false });
+    return () => container.removeEventListener('touchmove', handleTouchMove);
+  }, [isDraggingLock]);
+
+  const handlePointerDown = (e: React.PointerEvent) => {
+    const clientY = e.clientY;
+    const h = window.innerHeight;
+
+    if (!isLocked) {
+      // Pull down from home screen to lock - broadened area
+      if (clientY < h * 0.3) {
+        startY.current = clientY;
+        lastY.current = clientY;
+        lastTime.current = Date.now();
+        setIsDraggingLock(true);
+        setIsCancellingDrag(false);
+        pullOffset.set(0);
+      }
+    } else if (!isEnteringPasscode) {
+      // Swipe up from lock screen to passcode - broadened area
+      if (clientY > h * 0.5) {
+        startY.current = clientY;
+        lastY.current = clientY;
+        lastTime.current = Date.now();
+        setIsDraggingLock(true);
+        setIsCancellingDrag(false);
+        pullOffset.set(0);
+      }
+    }
+  };
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (!isDraggingLock) return;
+    const clientY = e.clientY;
+    const deltaY = clientY - startY.current;
+
+    const now = Date.now();
+    const dt = now - lastTime.current;
+    if (dt > 0) {
+      velocity.current = (clientY - lastY.current) / dt;
+    }
+    lastY.current = clientY;
+    lastTime.current = now;
+
+    if (!isLocked) {
+      if (deltaY > 0) pullOffset.set(deltaY);
+    } else {
+      if (deltaY < 0) pullOffset.set(deltaY);
+    }
+  };
+
+  const handlePointerUp = (e: React.PointerEvent) => {
+    if (!isDraggingLock) return;
+    setIsDraggingLock(false);
+
+    const h = window.innerHeight;
+    const currentOffset = pullOffset.get();
+
+    if (!isLocked) {
+      // Only lock if velocity is high (flick) OR if distance is very large (near bottom)
+      if (velocity.current > 1.5 || currentOffset > h * 0.85) {
+        setIsLocked(true);
+        pullOffset.set(0);
+      } else {
+        setIsCancellingDrag(true);
+        animate(pullOffset, 0, { type: "spring", damping: 25, stiffness: 200, onComplete: () => setIsCancellingDrag(false) });
+      }
+    } else {
+      if (currentOffset < -h * 0.2 || velocity.current < -0.5) {
+        setIsEnteringPasscode(true);
+      } else {
+        setIsCancellingDrag(true);
+        setTimeout(() => setIsCancellingDrag(false), 300);
+      }
+      pullOffset.set(0);
+    }
+  };
 
   return (
-    <div className="fixed inset-0 overflow-hidden bg-[#e0e0e5]">
-      <LiquidBackground dragY={isLocked && !isEnteringPasscode ? (lockDragY as any) : undefined} />
-      
-      <AnimatePresence mode="wait">
-        {isLocked ? (
-          !isEnteringPasscode ? (
-            <LockScreen key="lock" onUnlock={() => setIsEnteringPasscode(true)} dragY={lockDragY} />
-          ) : (
-            <PasscodeScreen 
-              key="passcode" 
-              onCancel={() => setIsEnteringPasscode(false)} 
-              onSuccess={() => {
-                setIsLocked(false);
-                setIsEnteringPasscode(false);
-              }} 
-            />
-          )
-        ) : (
-          <HomeScreen key="home" onLock={() => setIsLocked(true)} />
+    <div 
+      ref={containerRef}
+      className="h-[100dvh] w-screen relative bg-white select-none"
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerUp}
+      onPointerLeave={handlePointerUp}
+    >
+      {/* Home Screen - Always mounted to preserve state */}
+      <div className="absolute inset-0 z-0">
+        <HomeScreen isLocked={isLocked} onOpenApp={(app) => setActiveApp(app)} scale={homeScreenScale} />
+      </div>
+
+      {/* Apps */}
+      <AnimatePresence>
+        {activeApp === 'settings' && (
+          <SettingsApp onClose={() => setActiveApp(null)} />
+        )}
+      </AnimatePresence>
+
+      {/* Lock Screen / Passcode Screen */}
+      <AnimatePresence>
+        {(isLocked || isDraggingLock || isCancellingDrag) && (
+          <motion.div
+            key="lock-container"
+            className="absolute inset-0 z-50"
+            initial={false}
+            style={{ 
+              y: isLocked 
+                ? (isEnteringPasscode ? 0 : pullOffset) 
+                : (isDraggingLock ? lockScreenPullDownY : undefined)
+            }}
+            animate={{ 
+              y: isEnteringPasscode 
+                ? 0 
+                : (isLocked ? 0 : -window.innerHeight),
+              opacity: 1
+            }}
+            exit={{ opacity: 0, scale: 1.05 }}
+            transition={isDraggingLock ? { duration: 0 } : { type: "spring", damping: 25, stiffness: 200 }}
+          >
+            {!isEnteringPasscode ? (
+              <LockScreen onUnlock={() => setIsEnteringPasscode(true)} dragY={pullOffset} />
+            ) : (
+              <PasscodeScreen 
+                onCancel={() => setIsEnteringPasscode(false)} 
+                onSuccess={() => {
+                  setIsLocked(false);
+                  setIsEnteringPasscode(false);
+                }} 
+                dragY={pullOffset}
+              />
+            )}
+          </motion.div>
         )}
       </AnimatePresence>
     </div>

@@ -5,21 +5,39 @@
 }
 
 @layer base {
+/* 
+  [FEATURE: NO-BOUNCE & FIXED POSITIONING]
+  These features are preserved but "not running" per user request.
+  To activate the "Hard Lock" version, uncomment the lines below and 
+  set overscroll-behavior to 'none'.
+*/
+/*
+.hard-lock-active {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  touch-action: none;
+}
+*/
+
 html, body {
   height: 100dvh;
   width: 100vw;
+  @apply bg-[#e0e0e5];
 }
 
 body {
-  @apply bg-white text-black antialiased;
+  @apply bg-[#e0e0e5] text-black antialiased;
   font-family: var(--font-sans);
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: auto;
 }
   * {
     -webkit-tap-highlight-color: transparent;
+    outline: none;
   }
 }
 

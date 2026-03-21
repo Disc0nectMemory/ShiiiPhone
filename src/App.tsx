@@ -20,84 +20,23 @@ import {
   ChevronUp,
   Wifi,
   Signal,
+  User,
+  MoreHorizontal,
+  Plus,
+  Home,
+  Video,
+  X,
+  Check,
+  Smile,
 } from 'lucide-react';
 
 // --- Components ---
 
 const LiquidBackground = ({ dragY }: { dragY?: MotionValue<number> }) => {
-  const defaultDragY = useMotionValue(0);
-  const activeDragY = (dragY || defaultDragY) as MotionValue<number>;
-  
-  const blurValue = useTransform(activeDragY, [0, -400], [60, 100]);
-  const scaleValue = useTransform(activeDragY, [0, -400], [1, 1.15]);
-  const filterValue = useTransform(blurValue, (v) => `blur(${v}px)`);
-  
-  // Dynamic blob movements based on drag
-  const dragY1 = useTransform(activeDragY, [0, -400], [0, -120]);
-  const dragY2 = useTransform(activeDragY, [0, -400], [0, 100]);
-  const dragX1 = useTransform(activeDragY, [0, -400], [0, 60]);
-  const dragX2 = useTransform(activeDragY, [0, -400], [0, -40]);
-
-  const toggleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().catch((e) => {
-        console.error(`Error attempting to enable full-screen mode: ${e.message} (${e.name})`);
-      });
-    } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-      }
-    }
-  };
-
   return (
-    <motion.div 
-      onClick={toggleFullscreen}
-      style={{ filter: filterValue, scale: scaleValue }}
-      className="absolute inset-0 z-0 overflow-hidden bg-[#e0e0e5] cursor-pointer"
-    >
-      {/* Primary Blobs - Grayscale with more contrast */}
-      <motion.div 
-        style={{ y: dragY1 }} 
-        className="liquid-blob w-[80vw] h-[80vw] max-w-[800px] max-h-[800px] bg-slate-400/40 top-[-10%] left-[-10%] opacity-80" 
-      />
-      <motion.div 
-        style={{ y: dragY2, animationDelay: '-7s' }} 
-        className="liquid-blob w-[70vw] h-[70vw] max-w-[700px] max-h-[700px] bg-zinc-500/30 bottom-[-5%] right-[-5%] opacity-70" 
-      />
-      <motion.div 
-        style={{ x: dragX1, animationDelay: '-14s' }} 
-        className="liquid-blob w-[60vw] h-[60vw] max-w-[600px] max-h-[600px] bg-stone-400/30 top-[20%] right-[-10%] opacity-60" 
-      />
-      <motion.div 
-        style={{ x: dragX2, animationDelay: '-21s' }} 
-        className="liquid-blob w-[75vw] h-[75vw] max-w-[750px] max-h-[750px] bg-gray-400/30 bottom-[10%] left-[-5%] opacity-50" 
-      />
-      
-      {/* Accent Blobs for Mesh Effect */}
-      <motion.div 
-        animate={{ 
-          scale: [1, 1.2, 1],
-          opacity: [0.3, 0.5, 0.3]
-        }}
-        transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute top-[40%] left-[30%] w-[40vw] h-[40vw] max-w-[400px] max-h-[400px] bg-white/60 rounded-full blur-[80px]" 
-      />
-      <motion.div 
-        animate={{ 
-          scale: [1.2, 1, 1.2],
-          opacity: [0.2, 0.4, 0.2]
-        }}
-        transition={{ duration: 18, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-        className="absolute bottom-[30%] right-[20%] w-[45vw] h-[45vw] max-w-[450px] max-h-[450px] bg-slate-200/40 rounded-full blur-[90px]" 
-      />
-
-      {/* Noise Texture */}
-      <div className="liquid-noise" />
-      
-      {/* Subtle Vignette */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/20 pointer-events-none" />
-    </motion.div>
+    <div 
+      className="absolute inset-0 z-0 bg-[#e0e0e5]"
+    />
   );
 };
 
@@ -123,27 +62,9 @@ const LockScreen: React.FC<{ onUnlock: () => void; dragY: MotionValue<number> }>
   const dateString = `${time.getMonth() + 1}月${time.getDate()}日${weekDays[time.getDay()]}`;
 
   return (
-    <div className="relative h-screen w-full flex flex-col items-center justify-between pt-16 pb-6 overflow-hidden select-none touch-none">
+    <div className="relative min-h-screen w-full flex flex-col items-center justify-between pt-16 pb-6 select-none">
       <LiquidBackground dragY={smoothDragY} />
       
-      {/* Liquid Glass Overlay during swipe */}
-      <motion.div 
-        style={{ 
-          opacity: glassOpacity,
-          backdropFilter,
-        }}
-        className="absolute inset-0 z-10 bg-white/5 pointer-events-none"
-      >
-        {/* Shine effect */}
-        <motion.div 
-          style={{ 
-            y: useTransform(smoothDragY, [0, -600], [400, -200]),
-            opacity: useTransform(smoothDragY, [0, -300], [0, 0.4])
-          }}
-          className="absolute inset-x-0 h-[400px] bg-gradient-to-b from-white/20 to-transparent blur-3xl"
-        />
-      </motion.div>
-
       <motion.div 
         style={{ 
           opacity: contentOpacity, 
@@ -182,11 +103,11 @@ const LockScreen: React.FC<{ onUnlock: () => void; dragY: MotionValue<number> }>
         className="z-20 w-full flex flex-col items-center mb-0 gap-4"
       >
         <div className="w-full max-w-[600px] px-12 flex justify-between items-end pb-12">
-          <motion.div whileTap={{ scale: 0.9 }} className="ios-liquid-button cursor-pointer outline-none">
+          <motion.div whileTap={{ scale: 0.9 }} className="ios-liquid-button cursor-pointer outline-none touch-manipulation will-change-transform">
             <Flashlight size={24} strokeWidth={1.8} />
           </motion.div>
           
-          <motion.div whileTap={{ scale: 0.9 }} className="ios-liquid-button cursor-pointer outline-none">
+          <motion.div whileTap={{ scale: 0.9 }} className="ios-liquid-button cursor-pointer outline-none touch-manipulation will-change-transform">
             <Camera size={24} strokeWidth={1.8} />
           </motion.div>
         </div>
@@ -252,11 +173,11 @@ const PasscodeScreen: React.FC<{ onCancel: () => void; onSuccess: () => void; dr
       animate={{ opacity: 1 }}
       exit={{ opacity: 0, filter: 'blur(30px)' }}
       transition={{ duration: 0.6, ease: [0.32, 0.72, 0, 1] }}
-      className="fixed inset-0 z-50 flex flex-col items-center pt-20 pb-12 overflow-hidden bg-black/20 backdrop-blur-sm select-none touch-none"
+      className="absolute inset-0 z-50 flex flex-col items-center pt-20 pb-12 select-none"
     >
-      <LiquidBackground dragY={smoothDragY} />
-      <div className="absolute inset-0 bg-black/40 z-10 pointer-events-none" />
-
+      {/* Uniform darkening overlay for the wallpaper */}
+      <div className="absolute inset-0 bg-black/30 z-0 pointer-events-none" />
+      
       <div className="z-20 flex flex-col items-center mt-[8vh] gap-6">
         <div 
           className="text-white font-normal tracking-wide"
@@ -289,7 +210,7 @@ const PasscodeScreen: React.FC<{ onCancel: () => void; onSuccess: () => void; dr
               e.preventDefault();
               handleNumber(btn.num);
             }} 
-            className="keypad-button outline-none"
+            className="keypad-button outline-none touch-manipulation will-change-transform"
           >
             <span className="text-[32px] font-bold leading-none">{btn.num}</span>
             {btn.letters && (
@@ -340,7 +261,7 @@ const PasscodeScreen: React.FC<{ onCancel: () => void; onSuccess: () => void; dr
   );
 };
 
-const AppIcon = ({ icon: Icon, label, color, onClick, showLabel = true, className = "", iconSize = 32 }: any) => (
+const AppIcon = ({ icon: Icon, image, label, color, onClick, showLabel = true, className = "", iconSize = 32 }: any) => (
   <div 
     className={`flex flex-col items-center gap-1.5 cursor-pointer select-none ${className}`}
     onClick={(e) => {
@@ -350,11 +271,15 @@ const AppIcon = ({ icon: Icon, label, color, onClick, showLabel = true, classNam
   >
     <motion.div 
       whileTap={{ scale: 0.9 }}
-      className={`w-full aspect-square rounded-[22px] flex items-center justify-center shadow-sm relative overflow-hidden outline-none ${color}`}
+      className={`w-full aspect-square rounded-[22px] flex items-center justify-center shadow-sm relative overflow-hidden outline-none touch-manipulation will-change-transform ${color}`}
     >
       {/* Liquid Overlay */}
       <div className="absolute inset-0 bg-white/5 backdrop-blur-[2px]" />
-      {Icon && <Icon size={iconSize} color={color.includes('white') || color.includes('100') || color.includes('200') ? '#1c1c1e' : 'white'} strokeWidth={1.5} className="relative z-10 opacity-60" />}
+      {image ? (
+        <img src={image} alt={label} className="absolute inset-0 w-full h-full object-cover" referrerPolicy="no-referrer" />
+      ) : (
+        Icon && <Icon size={iconSize} color={color.includes('white') || color.includes('100') || color.includes('200') ? '#1c1c1e' : 'white'} strokeWidth={1.5} className="relative z-10 opacity-60" />
+      )}
     </motion.div>
     {showLabel && <span className="text-[12px] text-black/80 font-medium tracking-tight">{label}</span>}
   </div>
@@ -375,6 +300,207 @@ const SettingsApp = ({ onClose }: { onClose: () => void }) => {
       
       <div className="flex-1" />
 
+      {/* Home Indicator to close */}
+      <div className="fixed bottom-2 left-1/2 -translate-x-1/2 z-[70]">
+        <div 
+          onClick={onClose}
+          className="w-32 h-1 bg-black/20 rounded-full cursor-pointer outline-none" 
+        />
+      </div>
+    </motion.div>
+  );
+};
+
+const WeChatApp = ({ onClose }: { onClose: () => void }) => {
+  const [isDiaryOpen, setIsDiaryOpen] = useState(false);
+  const [diaryContent, setDiaryContent] = useState('');
+  const [mood, setMood] = useState('✨');
+
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth() + 1;
+  const todayDate = now.getDate();
+  const dayOfWeek = now.getDay(); // 0 is Sunday
+
+  // Calculate the start of the week (Sunday)
+  const startOfWeek = new Date(now);
+  startOfWeek.setDate(todayDate - dayOfWeek);
+
+  const weekDates = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(startOfWeek);
+    d.setDate(startOfWeek.getDate() + i);
+    return {
+      date: d.getDate(),
+      day: ['日', '一', '二', '三', '四', '五', '六'][i],
+      isToday: d.getDate() === todayDate && d.getMonth() === now.getMonth(),
+      lunar: ['初七', '初八', '初九', '初十', '十一', '十二', '十三'][i] // Mock lunar for aesthetic
+    };
+  });
+
+  const weekRange = `${weekDates[0].date} ~ ${weekDates[6].date}`;
+
+  return (
+    <motion.div
+      initial={{ y: '100%' }}
+      animate={{ y: 0 }}
+      exit={{ y: '100%' }}
+      transition={{ type: 'spring', damping: 28, stiffness: 220 }}
+      className="absolute inset-0 z-[60] bg-zinc-200 flex flex-col select-none overflow-hidden"
+    >
+      {/* iOS 26 Full Transparent Liquid Glass Header */}
+      <div className="absolute top-0 left-0 right-0 z-30 bg-transparent text-black pt-14 pb-16 px-8">
+        <div className="flex justify-between items-center">
+          <span className="text-[26px] font-black tracking-tighter text-black/90">WeChat</span>
+          <Plus size={28} strokeWidth={2.5} className="text-black/90" />
+        </div>
+      </div>
+
+      {/* Content Card with Aesthetic Rounded Corners and Shadow */}
+      <div className="flex-1 overflow-y-auto bg-white/95 backdrop-blur-md rounded-t-[64px] relative z-10 mt-[100px] shadow-[0_-15px_50px_rgba(0,0,0,0.12),0_-5px_15px_rgba(0,0,0,0.05)] flex flex-col">
+        {/* The "Thick Edge" effect - refined for aesthetic curve */}
+        <div className="absolute top-0 left-0 right-0 h-[8px] rounded-t-[64px] z-20 overflow-hidden pointer-events-none">
+          <div className="absolute inset-0 bg-black/[0.03] blur-[2px]" />
+          <div className="absolute inset-x-0 top-0 h-[3px] bg-white/90" />
+        </div>
+        
+        {/* Calendar Section - Optimized for Screen Width */}
+        <div className="px-6 py-12">
+          <div className="flex flex-col mb-10">
+            <span className="text-[26px] font-black text-black/90 tracking-tighter">{year}年{month}月</span>
+            <span className="text-[14px] text-black/25 font-black tracking-[0.25em] uppercase mt-1">本周 {month}.{weekRange}</span>
+          </div>
+          <div className="grid grid-cols-7 gap-1">
+            {weekDates.map((item, i) => (
+              <motion.div 
+                key={i} 
+                whileTap={item.isToday ? { scale: 0.92 } : {}}
+                onClick={() => item.isToday && setIsDiaryOpen(true)}
+                className="flex flex-col items-center gap-5 cursor-pointer"
+              >
+                <span className="text-[13px] text-black/20 font-black">{item.day}</span>
+                <div className={`w-full aspect-[4/5] max-w-[42px] rounded-[22px] flex flex-col items-center justify-center transition-all duration-500 relative overflow-hidden ${
+                  item.isToday 
+                    ? 'bg-white/30 backdrop-blur-[30px] text-black shadow-[inset_0_1px_3px_rgba(255,255,255,0.9),0_15px_35px_rgba(0,0,0,0.12)] border border-white/60' 
+                    : 'text-black/80 hover:bg-zinc-50'
+                }`}>
+                  {item.isToday && (
+                    <>
+                      {/* Advanced Liquid Glass Highlights */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-white via-transparent to-black/5 opacity-40" />
+                      <div className="absolute top-1.5 left-3 right-3 h-[1.5px] bg-white/90 rounded-full blur-[0.5px]" />
+                    </>
+                  )}
+                  <span className="text-[18px] font-black leading-none relative z-10 tracking-tighter text-black/90">{item.date}</span>
+                  <span className={`text-[10px] mt-2 font-black relative z-10 ${item.isToday ? 'text-black/40' : 'text-black/20'}`}>
+                    {item.lunar}
+                  </span>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+
+        {/* Empty Chat List Section */}
+        <div className="flex-1 px-6 border-t border-black/[0.02] pt-16 flex flex-col items-center">
+          <div className="flex flex-col items-center justify-center py-20 opacity-[0.02]">
+            <div className="w-24 h-24 rounded-full border-[1.5px] border-black flex items-center justify-center mb-8">
+              <MessageCircle size={40} strokeWidth={1} />
+            </div>
+            <span className="text-[14px] font-black tracking-[0.5em] uppercase">No Messages</span>
+          </div>
+          
+          {/* Search Bar as seen in screenshot */}
+          <div className="mt-auto mb-12 w-full max-w-[140px] h-10 bg-zinc-100/50 rounded-full flex items-center justify-center gap-2 text-black/20">
+            <Search size={14} strokeWidth={3} />
+            <span className="text-[12px] font-black tracking-widest uppercase">搜索</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Diary Editor Overlay */}
+      <AnimatePresence>
+        {isDiaryOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            className="absolute inset-0 z-[80] bg-white/95 backdrop-blur-2xl p-8 flex flex-col"
+          >
+            <div className="flex justify-between items-center mb-12">
+              <motion.button 
+                whileTap={{ scale: 0.9 }}
+                onClick={() => setIsDiaryOpen(false)}
+                className="w-10 h-10 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-400"
+              >
+                <X size={20} />
+              </motion.button>
+              <div className="flex flex-col items-center">
+                <span className="text-[18px] font-bold text-black/90">今日心情</span>
+                <span className="text-[12px] text-black/30 font-medium">{month}月{todayDate}日</span>
+              </div>
+              <motion.button 
+                whileTap={{ scale: 0.9 }}
+                onClick={() => setIsDiaryOpen(false)}
+                className="w-10 h-10 rounded-full bg-black flex items-center justify-center text-white"
+              >
+                <Check size={20} />
+              </motion.button>
+            </div>
+
+            <div className="flex-1 flex flex-col gap-8">
+              <div className="flex justify-center gap-4">
+                {['✨', '☁️', '🌿', '🌊', '🌙'].map(m => (
+                  <button 
+                    key={m}
+                    onClick={() => setMood(m)}
+                    className={`text-2xl w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${mood === m ? 'bg-zinc-100 scale-110 shadow-sm' : 'opacity-40'}`}
+                  >
+                    {m}
+                  </button>
+                ))}
+              </div>
+
+              <textarea
+                autoFocus
+                value={diaryContent}
+                onChange={(e) => setDiaryContent(e.target.value)}
+                placeholder="记录下此刻的想法..."
+                className="flex-1 bg-transparent text-[20px] font-medium text-black/80 placeholder:text-black/10 resize-none outline-none leading-relaxed"
+              />
+            </div>
+
+            <div className="pb-12 flex items-center gap-2 text-zinc-300">
+              <Smile size={18} />
+              <span className="text-[13px] font-medium">此刻的心情是 {mood}</span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Bottom Navigation */}
+      <div className="bg-white/80 backdrop-blur-xl border-t border-black/[0.03] pb-8 pt-3 flex justify-around items-center px-4 z-10">
+        <div className="flex flex-col items-center gap-1">
+          <div className="w-10 h-6 bg-black rounded-full flex items-center justify-center text-white">
+            <MessageCircle size={16} fill="currentColor" />
+          </div>
+          <span className="text-[10px] text-black font-bold">Chats</span>
+        </div>
+        <div className="flex flex-col items-center gap-1 opacity-20">
+          <User size={20} />
+          <span className="text-[10px] text-black font-bold">Contacts</span>
+        </div>
+        <div className="flex flex-col items-center gap-1 opacity-20">
+          <Clock size={20} />
+          <span className="text-[10px] text-black font-bold">Discover</span>
+        </div>
+        <div className="flex flex-col items-center gap-1 opacity-20">
+          <div className="w-5 h-5 border-2 border-black rounded-md flex items-center justify-center">
+            <div className="w-2 h-2 bg-black rounded-full" />
+          </div>
+          <span className="text-[10px] text-black font-bold">Me</span>
+        </div>
+      </div>
+      
       {/* Home Indicator to close */}
       <div className="fixed bottom-2 left-1/2 -translate-x-1/2 z-[70]">
         <div 
@@ -465,57 +591,58 @@ const HomeScreen: React.FC<{ isLocked: boolean; onOpenApp: (app: string) => void
           <motion.div 
             whileTap={{ scale: 0.95 }}
             onClick={() => handleWidgetClick('circle-1')}
-            className="col-span-1 aspect-square bg-white/90 rounded-full shadow-sm flex items-center justify-center relative overflow-hidden cursor-pointer"
+            className="col-span-1 aspect-square bg-white/90 rounded-full shadow-sm flex items-center justify-center relative overflow-hidden cursor-pointer touch-manipulation will-change-transform"
           >
             {widgetImages['circle-1'] && <img src={widgetImages['circle-1']} alt="" className="absolute inset-0 w-full h-full object-cover" />}
           </motion.div>
-          <motion.div whileTap={{ scale: 0.95 }} className="col-span-3 bg-white/90 rounded-full shadow-sm p-4 flex flex-col justify-center relative overflow-hidden cursor-pointer" />
+          <motion.div whileTap={{ scale: 0.95 }} className="col-span-3 bg-white/90 rounded-full shadow-sm p-4 flex flex-col justify-center relative overflow-hidden cursor-pointer touch-manipulation will-change-transform" />
           
           {/* Row 2 */}
-          <motion.div whileTap={{ scale: 0.95 }} className="col-span-1 aspect-square bg-white/90 rounded-[22px] shadow-sm flex items-center justify-center relative overflow-hidden cursor-pointer" />
-          <motion.div whileTap={{ scale: 0.95 }} className="col-span-1 aspect-square bg-white/90 rounded-[22px] shadow-sm flex items-center justify-center relative overflow-hidden cursor-pointer" />
+          <motion.div whileTap={{ scale: 0.95 }} className="col-span-1 aspect-square bg-white/90 rounded-[22px] shadow-sm flex items-center justify-center relative overflow-hidden cursor-pointer touch-manipulation will-change-transform" />
+          <motion.div whileTap={{ scale: 0.95 }} className="col-span-1 aspect-square bg-white/90 rounded-[22px] shadow-sm flex items-center justify-center relative overflow-hidden cursor-pointer touch-manipulation will-change-transform" />
           <motion.div 
             whileTap={{ scale: 0.95 }}
             onClick={() => handleWidgetClick('large-square')}
-            className="col-span-2 row-span-2 bg-white/90 rounded-[32px] shadow-sm p-5 flex flex-col relative overflow-hidden cursor-pointer"
+            className="col-span-2 row-span-2 bg-white/90 rounded-[32px] shadow-sm p-5 flex flex-col relative overflow-hidden cursor-pointer touch-manipulation will-change-transform"
           >
             {widgetImages['large-square'] && <img src={widgetImages['large-square']} alt="" className="absolute inset-0 w-full h-full object-cover" />}
           </motion.div>
           
           {/* Row 3 */}
-          <motion.div whileTap={{ scale: 0.95 }} className="col-span-1 aspect-square bg-zinc-200/80 rounded-[22px] shadow-sm flex items-center justify-center relative overflow-hidden cursor-pointer" />
-          <motion.div whileTap={{ scale: 0.95 }} className="col-span-1 aspect-square bg-zinc-200/80 rounded-[22px] shadow-sm flex items-center justify-center relative overflow-hidden cursor-pointer" />
+          <motion.div whileTap={{ scale: 0.95 }} className="col-span-1 aspect-square bg-zinc-200/80 rounded-[22px] shadow-sm flex items-center justify-center relative overflow-hidden cursor-pointer touch-manipulation will-change-transform" />
+          <motion.div whileTap={{ scale: 0.95 }} className="col-span-1 aspect-square bg-zinc-200/80 rounded-[22px] shadow-sm flex items-center justify-center relative overflow-hidden cursor-pointer touch-manipulation will-change-transform" />
 
           {/* Row 4 */}
           <motion.div 
             whileTap={{ scale: 0.95 }}
             onClick={() => handleWidgetClick('donut')}
-            className="col-span-2 row-span-2 aspect-square drop-shadow-[0_8px_16px_rgba(0,0,0,0.15)] cursor-pointer rounded-full"
+            className="col-span-2 row-span-2 aspect-square shadow-xl cursor-pointer rounded-full touch-manipulation will-change-transform"
           >
             <motion.div
               animate={{ rotate: 360 }}
               transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
               style={{ 
                 WebkitMaskImage: 'radial-gradient(circle, transparent 15%, black 16%)', 
-                maskImage: 'radial-gradient(circle, transparent 15%, black 16%)' 
+                maskImage: 'radial-gradient(circle, transparent 15%, black 16%)',
+                willChange: 'transform, mask-image'
               }}
               className="w-full h-full bg-gradient-to-tr from-zinc-400 via-zinc-200 to-zinc-50 rounded-full relative overflow-hidden"
             >
                {widgetImages['donut'] && <img src={widgetImages['donut']} alt="" className="absolute inset-0 w-full h-full object-cover" />}
             </motion.div>
           </motion.div>
-          <motion.div whileTap={{ scale: 0.95 }} className="col-span-1 aspect-square bg-zinc-300/80 rounded-[22px] shadow-sm flex items-center justify-center relative overflow-hidden cursor-pointer" />
-          <motion.div whileTap={{ scale: 0.95 }} className="col-span-1 aspect-square bg-zinc-400/80 rounded-[22px] shadow-sm flex items-center justify-center relative overflow-hidden cursor-pointer" />
+          <motion.div whileTap={{ scale: 0.95 }} className="col-span-1 aspect-square bg-zinc-300/80 rounded-[22px] shadow-sm flex items-center justify-center relative overflow-hidden cursor-pointer touch-manipulation will-change-transform" />
+          <motion.div whileTap={{ scale: 0.95 }} className="col-span-1 aspect-square bg-zinc-400/80 rounded-[22px] shadow-sm flex items-center justify-center relative overflow-hidden cursor-pointer touch-manipulation will-change-transform" />
 
           {/* Row 5 */}
-          <motion.div whileTap={{ scale: 0.95 }} className="col-span-1 aspect-square bg-zinc-100/80 rounded-[22px] shadow-sm flex items-center justify-center relative overflow-hidden cursor-pointer" />
-          <motion.div whileTap={{ scale: 0.95 }} className="col-span-1 aspect-square bg-zinc-100/80 rounded-[22px] shadow-sm flex items-center justify-center relative overflow-hidden cursor-pointer" />
+          <motion.div whileTap={{ scale: 0.95 }} className="col-span-1 aspect-square bg-zinc-100/80 rounded-[22px] shadow-sm flex items-center justify-center relative overflow-hidden cursor-pointer touch-manipulation will-change-transform" />
+          <motion.div whileTap={{ scale: 0.95 }} className="col-span-1 aspect-square bg-zinc-100/80 rounded-[22px] shadow-sm flex items-center justify-center relative overflow-hidden cursor-pointer touch-manipulation will-change-transform" />
 
           {/* Row 6 */}
           <motion.div 
             whileTap={{ scale: 0.95 }}
             onClick={() => handleWidgetClick('rect-ears')}
-            className="col-span-4 aspect-[4/1.4] mt-4 relative cursor-pointer drop-shadow-md pointer-events-none"
+            className="col-span-4 aspect-[4/1.4] mt-4 relative cursor-pointer pointer-events-none touch-manipulation will-change-transform filter drop-shadow-[0_10px_15px_rgba(0,0,0,0.1)]"
           >
              {/* Left Ear */}
              <div className="absolute top-0 left-8 w-12 h-full overflow-hidden rounded-t-2xl bg-white/90 pointer-events-auto">
@@ -543,7 +670,7 @@ const HomeScreen: React.FC<{ isLocked: boolean; onOpenApp: (app: string) => void
       </div>
 
       {/* Search Pill */}
-      <motion.div whileTap={{ scale: 0.95 }} className="fixed bottom-[140px] left-1/2 -translate-x-1/2 z-10 cursor-pointer">
+      <motion.div whileTap={{ scale: 0.95 }} className="fixed bottom-[140px] left-1/2 -translate-x-1/2 z-10 cursor-pointer touch-manipulation will-change-transform">
         <div className="liquid-glass-dark px-4 py-1.5 rounded-full flex items-center gap-1.5 bg-black/5 border-none shadow-none">
           <Search size={12} className="text-black/40" strokeWidth={3} />
           <span className="text-[11px] text-black/60 font-medium tracking-tight">搜索</span>
@@ -556,7 +683,7 @@ const HomeScreen: React.FC<{ isLocked: boolean; onOpenApp: (app: string) => void
           <div className="grid grid-cols-4 gap-4">
             {[
               { color: 'bg-zinc-900' },
-              { color: 'bg-zinc-800' },
+              { color: 'bg-zinc-800', icon: MessageCircle, iconSize: 18, onClick: () => onOpenApp('wechat') },
               { color: 'bg-zinc-600' },
               { color: 'bg-zinc-400', icon: Settings, iconSize: 18, onClick: () => onOpenApp('settings') },
             ].map((app, i) => (
@@ -590,6 +717,34 @@ export default function App() {
   const velocity = useRef(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  /* 
+    [FEATURE: FAKE NO-BOUNCE]
+    This logic "fakes" the no-bounce feature by preventing default touch behavior 
+    at the scroll boundaries. It is currently "not running" as requested.
+  */
+  /*
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleTouchMove = (e: TouchEvent) => {
+      const { scrollTop, scrollHeight, clientHeight } = container;
+      const isAtTop = scrollTop <= 0;
+      const isAtBottom = scrollTop + clientHeight >= scrollHeight;
+
+      if (isAtTop && e.touches[0].clientY > startY.current) {
+        e.preventDefault();
+      }
+      if (isAtBottom && e.touches[0].clientY < startY.current) {
+        e.preventDefault();
+      }
+    };
+
+    container.addEventListener('touchmove', handleTouchMove, { passive: false });
+    return () => container.removeEventListener('touchmove', handleTouchMove);
+  }, []);
+  */
+
   const lockScreenPullDownY = useTransform(pullOffset, v => v - window.innerHeight);
   const homeScreenScale = useTransform(pullOffset, (v) => {
     if (isLocked) return 1.1;
@@ -618,8 +773,8 @@ export default function App() {
     const h = window.innerHeight;
 
     if (!isLocked) {
-      // Pull down from home screen to lock - broadened area
-      if (clientY < h * 0.3) {
+      // Pull down from home screen to lock - restricted to top area to avoid accidental triggers
+      if (clientY < 64) {
         startY.current = clientY;
         lastY.current = clientY;
         lastTime.current = Date.now();
@@ -690,7 +845,12 @@ export default function App() {
   return (
     <div 
       ref={containerRef}
-      className="h-[100dvh] w-screen relative bg-white select-none"
+      /* 
+        [FEATURE: HARD-LOCK POSITIONING]
+        To activate "Fixed Positioning", change className to include "hard-lock-active" 
+        (defined in index.css) or "fixed inset-0 overflow-hidden touch-none".
+      */
+      className="min-h-[100dvh] w-screen relative bg-[#e0e0e5] select-none"
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
@@ -702,10 +862,26 @@ export default function App() {
         <HomeScreen isLocked={isLocked} onOpenApp={(app) => setActiveApp(app)} scale={homeScreenScale} />
       </div>
 
+      {/* Background layer revealed when swiping up from lock screen */}
+      {isLocked && (
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="absolute inset-0 z-10 overflow-hidden pointer-events-none"
+        >
+          <LiquidBackground />
+          {/* Uniform darkening overlay for the wallpaper revealed during swipe */}
+          <div className="absolute inset-0 bg-black/30 z-0 pointer-events-none" />
+        </motion.div>
+      )}
+
       {/* Apps */}
       <AnimatePresence>
         {activeApp === 'settings' && (
           <SettingsApp onClose={() => setActiveApp(null)} />
+        )}
+        {activeApp === 'wechat' && (
+          <WeChatApp onClose={() => setActiveApp(null)} />
         )}
       </AnimatePresence>
 
@@ -714,7 +890,7 @@ export default function App() {
         {(isLocked || isDraggingLock || isCancellingDrag) && (
           <motion.div
             key="lock-container"
-            className="absolute inset-0 z-50"
+            className="absolute inset-0 z-50 overflow-hidden rounded-b-[48px] shadow-[0_0_40px_rgba(0,0,0,0.3)]"
             initial={false}
             style={{ 
               y: isLocked 

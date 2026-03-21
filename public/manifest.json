@@ -1,7 +1,7 @@
 {
-  "name": "诗诗机",
-  "short_name": "诗诗机",
-  "description": "iOS 26 风格的全屏沉浸式应用",
+  "name": "ElmPhone",
+  "short_name": "ElmPhone",
+  "description": "从此以后我是你存在的证明",
   "start_url": "/",
   "display": "standalone",
   "display_override": ["standalone", "fullscreen", "minimal-ui"],
@@ -10,15 +10,15 @@
   "orientation": "portrait",
   "icons": [
     {
-      "src": "https://picsum.photos/seed/ios/192/192",
+      "src": "https://traditional-sapphire-v04jn15eex.edgeone.app/ElmPhone.png.jpeg",
       "sizes": "192x192",
-      "type": "image/png",
+      "type": "image/jpeg",
       "purpose": "any maskable"
     },
     {
-      "src": "https://picsum.photos/seed/ios/512/512",
+      "src": "https://traditional-sapphire-v04jn15eex.edgeone.app/ElmPhone.png.jpeg",
       "sizes": "512x512",
-      "type": "image/png",
+      "type": "image/jpeg",
       "purpose": "any maskable"
     }
   ]

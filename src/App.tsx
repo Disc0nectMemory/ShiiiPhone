@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, useSpring, useMotionTemplate, MotionValue, animate } from 'motion/react';
 import ImageCropper from './components/ImageCropper';
+import { DEFAULT_AVATAR } from './constants';
 import { 
   Camera, 
   Flashlight, 
@@ -18,6 +19,7 @@ import {
   Cloud,
   Lock,
   ChevronUp,
+  ChevronRight,
   Wifi,
   Signal,
   User,
@@ -28,6 +30,11 @@ import {
   X,
   Check,
   Smile,
+  Info,
+  Key,
+  Palette,
+  Type,
+  HeartPulse,
 } from 'lucide-react';
 
 // --- Components ---
@@ -285,23 +292,56 @@ const AppIcon = ({ icon: Icon, image, label, color, onClick, showLabel = true, c
   </div>
 );
 
+import { ApiSettingsPage } from './components/ApiSettings';
+
 const SettingsApp = ({ onClose }: { onClose: () => void }) => {
+  const [activePage, setActivePage] = useState<'main' | 'api'>('main');
+
+  const settingsItems = [
+    { id: 'api', label: 'API设定', icon: Key, action: () => setActivePage('api') },
+    { id: 'aesthetic', label: '美化设置', icon: Palette, action: () => {} },
+    { id: 'font', label: '字体设置', icon: Type, action: () => {} },
+    { id: 'heartbeat', label: '角色心跳', icon: HeartPulse, action: () => {} },
+  ];
+
   return (
     <motion.div
       initial={{ y: '100%' }}
       animate={{ y: 0 }}
       exit={{ y: '100%' }}
       transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-      className="absolute inset-0 z-[60] bg-[#f2f2f7] flex flex-col pt-12 select-none"
+      className="absolute inset-0 z-[60] bg-[#f5f5f5] flex flex-col select-none font-sans"
     >
-      <div className="absolute top-14 left-0 right-0 flex justify-center pointer-events-none">
-        <span className="text-[17px] font-semibold text-black/90">设置</span>
-      </div>
-      
-      <div className="flex-1" />
+      {activePage === 'main' ? (
+        <>
+          <div className="pt-16 pb-4 flex flex-col items-center">
+            <span className="text-[15px] font-semibold text-black/80 tracking-widest mb-4">设置</span>
+            <div className="w-full h-[1px] bg-black/5" />
+          </div>
+          
+          <div className="flex-1 overflow-y-auto px-6 pb-10 bg-[#f5f5f5] space-y-1 mt-2">
+            {settingsItems.map((item) => (
+              <div 
+                key={item.id}
+                className="py-4 flex items-center cursor-pointer active:opacity-50 transition-opacity"
+                onClick={item.action}
+              >
+                <div className="flex items-center gap-3">
+                  <item.icon size={18} className="text-black/60" strokeWidth={1.5} />
+                  <span className="text-[14px] font-bold text-black/80 tracking-widest">{item.label}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      ) : (
+        <div className="absolute inset-0 z-10 bg-[#f5f5f5]">
+          <ApiSettingsPage onBack={() => setActivePage('main')} />
+        </div>
+      )}
 
       {/* Home Indicator to close */}
-      <div className="fixed bottom-2 left-1/2 -translate-x-1/2 z-[70]">
+      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-[70]">
         <div 
           onClick={onClose}
           className="w-32 h-1 bg-black/20 rounded-full cursor-pointer outline-none" 
@@ -311,10 +351,12 @@ const SettingsApp = ({ onClose }: { onClose: () => void }) => {
   );
 };
 
-const WeChatApp = ({ onClose }: { onClose: () => void }) => {
+const ChatApp = ({ onClose }: { onClose: () => void }) => {
   const [isDiaryOpen, setIsDiaryOpen] = useState(false);
+  const [isPlusMenuOpen, setIsPlusMenuOpen] = useState(false);
   const [diaryContent, setDiaryContent] = useState('');
   const [mood, setMood] = useState('✨');
+  const [activeTab, setActiveTab] = useState('Chats');
 
   const now = new Date();
   const year = now.getFullYear();
@@ -345,164 +387,281 @@ const WeChatApp = ({ onClose }: { onClose: () => void }) => {
       animate={{ y: 0 }}
       exit={{ y: '100%' }}
       transition={{ type: 'spring', damping: 28, stiffness: 220 }}
-      className="absolute inset-0 z-[60] bg-zinc-200 flex flex-col select-none overflow-hidden"
+      className="absolute inset-0 z-[60] bg-white flex flex-col select-none overflow-hidden"
     >
       {/* iOS 26 Full Transparent Liquid Glass Header */}
       <div className="absolute top-0 left-0 right-0 z-30 bg-transparent text-black pt-14 pb-16 px-8">
         <div className="flex justify-between items-center">
-          <span className="text-[26px] font-black tracking-tighter text-black/90">WeChat</span>
-          <Plus size={28} strokeWidth={2.5} className="text-black/90" />
+          <span className="text-[26px] font-black tracking-tighter text-black/90">
+            {activeTab === 'Chats' ? 'Chat' : activeTab === 'Contacts' ? 'Contacts' : activeTab === 'Discover' ? 'Discover' : ''}
+          </span>
+          {activeTab === 'Chats' && (
+            <motion.button whileTap={{ scale: 0.9 }} onClick={() => setIsPlusMenuOpen(true)}>
+              <Plus size={28} strokeWidth={2.5} className="text-black/90" />
+            </motion.button>
+          )}
         </div>
       </div>
 
-      {/* Content Card with Aesthetic Rounded Corners and Shadow */}
-      <div className="flex-1 overflow-y-auto bg-white/95 backdrop-blur-md rounded-t-[64px] relative z-10 mt-[100px] shadow-[0_-15px_50px_rgba(0,0,0,0.12),0_-5px_15px_rgba(0,0,0,0.05)] flex flex-col">
+      {/* Content Card - Clean White Design */}
+      <div className="flex-1 overflow-y-auto bg-white rounded-t-[64px] relative z-10 mt-[100px] shadow-[0_-10px_40px_rgba(0,0,0,0.05)] flex flex-col">
         {/* The "Thick Edge" effect - refined for aesthetic curve */}
         <div className="absolute top-0 left-0 right-0 h-[8px] rounded-t-[64px] z-20 overflow-hidden pointer-events-none">
           <div className="absolute inset-0 bg-black/[0.03] blur-[2px]" />
           <div className="absolute inset-x-0 top-0 h-[3px] bg-white/90" />
         </div>
         
-        {/* Calendar Section - Optimized for Screen Width */}
-        <div className="px-6 py-12">
-          <div className="flex flex-col mb-10">
-            <span className="text-[26px] font-black text-black/90 tracking-tighter">{year}年{month}月</span>
-            <span className="text-[14px] text-black/25 font-black tracking-[0.25em] uppercase mt-1">本周 {month}.{weekRange}</span>
-          </div>
-          <div className="grid grid-cols-7 gap-1">
-            {weekDates.map((item, i) => (
-              <motion.div 
-                key={i} 
-                whileTap={item.isToday ? { scale: 0.92 } : {}}
-                onClick={() => item.isToday && setIsDiaryOpen(true)}
-                className="flex flex-col items-center gap-5 cursor-pointer"
-              >
-                <span className="text-[13px] text-black/20 font-black">{item.day}</span>
-                <div className={`w-full aspect-[4/5] max-w-[42px] rounded-[22px] flex flex-col items-center justify-center transition-all duration-500 relative overflow-hidden ${
-                  item.isToday 
-                    ? 'bg-white/30 backdrop-blur-[30px] text-black shadow-[inset_0_1px_3px_rgba(255,255,255,0.9),0_15px_35px_rgba(0,0,0,0.12)] border border-white/60' 
-                    : 'text-black/80 hover:bg-zinc-50'
-                }`}>
-                  {item.isToday && (
-                    <>
-                      {/* Advanced Liquid Glass Highlights */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-white via-transparent to-black/5 opacity-40" />
-                      <div className="absolute top-1.5 left-3 right-3 h-[1.5px] bg-white/90 rounded-full blur-[0.5px]" />
-                    </>
-                  )}
-                  <span className="text-[18px] font-black leading-none relative z-10 tracking-tighter text-black/90">{item.date}</span>
-                  <span className={`text-[10px] mt-2 font-black relative z-10 ${item.isToday ? 'text-black/40' : 'text-black/20'}`}>
-                    {item.lunar}
-                  </span>
+        {activeTab === 'Chats' ? (
+          <>
+            {/* Calendar Section - Optimized for Screen Width */}
+            <div className="px-6 py-8">
+              <div className="bg-white/40 backdrop-blur-xl border border-white/60 rounded-[32px] p-6 shadow-xl shadow-black/5">
+                <div className="flex flex-col mb-6">
+                  <span className="text-[20px] font-black text-black/90 tracking-tighter">{year}年{month}月</span>
+                  <span className="text-[12px] text-black/25 font-black tracking-[0.25em] uppercase mt-1">本周 {month}.{weekRange}</span>
                 </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-
-        {/* Empty Chat List Section */}
-        <div className="flex-1 px-6 border-t border-black/[0.02] pt-16 flex flex-col items-center">
-          <div className="flex flex-col items-center justify-center py-20 opacity-[0.02]">
-            <div className="w-24 h-24 rounded-full border-[1.5px] border-black flex items-center justify-center mb-8">
-              <MessageCircle size={40} strokeWidth={1} />
+                <div className="grid grid-cols-7 gap-1">
+                  {weekDates.map((item, i) => (
+                    <motion.div 
+                      key={i} 
+                      whileTap={item.isToday ? { scale: 0.92 } : {}}
+                      onClick={() => item.isToday && setIsDiaryOpen(true)}
+                      className="flex flex-col items-center gap-3 cursor-pointer"
+                    >
+                      <span className="text-[11px] text-black/20 font-black">{item.day}</span>
+                      <div className={`w-full aspect-[4/5] max-w-[36px] rounded-[18px] flex flex-col items-center justify-center transition-all duration-500 relative overflow-hidden ${
+                        item.isToday 
+                          ? 'bg-white/30 backdrop-blur-[30px] text-black shadow-[inset_0_1px_3px_rgba(255,255,255,0.9),0_15px_35px_rgba(0,0,0,0.12)] border border-white/60' 
+                          : 'text-black/80 hover:bg-zinc-50'
+                      }`}>
+                        {item.isToday && (
+                          <>
+                            {/* Advanced Liquid Glass Highlights */}
+                            <div className="absolute inset-0 bg-gradient-to-br from-white via-transparent to-black/5 opacity-40" />
+                            <div className="absolute top-1.5 left-3 right-3 h-[1.5px] bg-white/90 rounded-full blur-[0.5px]" />
+                          </>
+                        )}
+                        <span className="text-[15px] font-black leading-none relative z-10 tracking-tighter text-black/90">{item.date}</span>
+                        <span className={`text-[9px] mt-1.5 font-black relative z-10 ${item.isToday ? 'text-black/40' : 'text-black/20'}`}>
+                          {item.lunar}
+                        </span>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
             </div>
-            <span className="text-[14px] font-black tracking-[0.5em] uppercase">No Messages</span>
+
+            {/* Empty Chat List Section */}
+            <div className="flex-1 px-6 border-t border-black/[0.02] pt-16 flex flex-col items-center">
+              <div className="flex flex-col items-center justify-center py-20 opacity-[0.02]">
+                <div className="w-24 h-24 rounded-full border-[1.5px] border-black flex items-center justify-center mb-8">
+                  <MessageCircle size={40} strokeWidth={1} />
+                </div>
+                <span className="text-[14px] font-black tracking-[0.5em] uppercase">No Messages</span>
+              </div>
+              
+              {/* Search Bar as seen in screenshot */}
+              <div className="mt-auto mb-12 w-full max-w-[140px] h-10 bg-zinc-100/50 rounded-full flex items-center justify-center gap-2 text-black/20">
+                <Search size={14} strokeWidth={3} />
+                <span className="text-[12px] font-black tracking-widest uppercase">搜索</span>
+              </div>
+            </div>
+          </>
+        ) : activeTab === 'Me' ? (
+          <div className="flex-1 bg-white" />
+        ) : (
+          <div className="flex-1 flex flex-col items-center justify-center opacity-40">
+            <div className="w-16 h-16 rounded-full border-2 border-black/20 flex items-center justify-center mb-4">
+              <Settings size={24} className="text-black/40 animate-[spin_4s_linear_infinite]" />
+            </div>
+            <span className="text-[14px] font-black tracking-[0.2em] uppercase text-black/60">开发中...</span>
           </div>
-          
-          {/* Search Bar as seen in screenshot */}
-          <div className="mt-auto mb-12 w-full max-w-[140px] h-10 bg-zinc-100/50 rounded-full flex items-center justify-center gap-2 text-black/20">
-            <Search size={14} strokeWidth={3} />
-            <span className="text-[12px] font-black tracking-widest uppercase">搜索</span>
-          </div>
-        </div>
+        )}
       </div>
+
+      {/* Plus Menu Overlay */}
+      <AnimatePresence>
+        {isPlusMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-[110] bg-black/20 backdrop-blur-sm flex items-center justify-center"
+            onClick={() => setIsPlusMenuOpen(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white rounded-3xl p-8 flex flex-col items-center shadow-2xl"
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="w-16 h-16 rounded-full border-2 border-black/20 flex items-center justify-center mb-4">
+                <Settings size={24} className="text-black/40 animate-[spin_4s_linear_infinite]" />
+              </div>
+              <span className="text-[14px] font-black tracking-[0.2em] uppercase text-black/60">开发中...</span>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Diary Editor Overlay */}
       <AnimatePresence>
         {isDiaryOpen && (
           <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="absolute inset-0 z-[80] bg-white/95 backdrop-blur-2xl p-8 flex flex-col"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="absolute inset-0 z-[100] bg-white/40 backdrop-blur-[80px] p-8 flex flex-col select-none"
           >
-            <div className="flex justify-between items-center mb-12">
-              <motion.button 
-                whileTap={{ scale: 0.9 }}
-                onClick={() => setIsDiaryOpen(false)}
-                className="w-10 h-10 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-400"
-              >
-                <X size={20} />
-              </motion.button>
-              <div className="flex flex-col items-center">
-                <span className="text-[18px] font-bold text-black/90">今日心情</span>
-                <span className="text-[12px] text-black/30 font-medium">{month}月{todayDate}日</span>
-              </div>
-              <motion.button 
-                whileTap={{ scale: 0.9 }}
-                onClick={() => setIsDiaryOpen(false)}
-                className="w-10 h-10 rounded-full bg-black flex items-center justify-center text-white"
-              >
-                <Check size={20} />
-              </motion.button>
+            {/* Top Header */}
+            <div className="flex flex-col items-center mb-6">
+              <span className="text-[20px] font-black text-black/90 tracking-tighter">今日心情</span>
+              <span className="text-[12px] text-black/30 font-black tracking-widest mt-1 uppercase">{month}月{todayDate}日</span>
             </div>
 
-            <div className="flex-1 flex flex-col gap-8">
-              <div className="flex justify-center gap-4">
-                {['✨', '☁️', '🌿', '🌊', '🌙'].map(m => (
-                  <button 
-                    key={m}
-                    onClick={() => setMood(m)}
-                    className={`text-2xl w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${mood === m ? 'bg-zinc-100 scale-110 shadow-sm' : 'opacity-40'}`}
-                  >
-                    {m}
-                  </button>
+            {/* Browser-like Top Bar (1) */}
+            <div className="flex justify-center mb-8">
+              <div className="bg-black/5 backdrop-blur-md border border-white/40 rounded-full px-4 py-2 flex items-center gap-6 shadow-sm">
+                <Info size={18} className="text-black/40" />
+                <div className="w-[1px] h-4 bg-black/10" />
+                <motion.button 
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => setIsDiaryOpen(false)}
+                  className="text-black/60"
+                >
+                  <X size={18} strokeWidth={2.5} />
+                </motion.button>
+              </div>
+            </div>
+
+            {/* URL-like Date Display */}
+            <div className="flex justify-center mb-10">
+              <div className="bg-white/40 backdrop-blur-xl border border-white/60 rounded-2xl px-6 py-3 shadow-lg shadow-black/5 flex items-center gap-3">
+                <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-[14px] font-black text-black/60 tracking-tight font-mono">
+                  {year}/{month.toString().padStart(2, '0')}/{todayDate.toString().padStart(2, '0')}
+                </span>
+              </div>
+            </div>
+
+            {/* Mood Selection */}
+            <div className="flex justify-center gap-3 mb-12">
+              {['✨', '☁️', '🌿', '🌊', '🌙'].map(m => (
+                <motion.button 
+                  key={m}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => setMood(m)}
+                  className={`text-2xl w-14 h-14 rounded-[24px] flex items-center justify-center transition-all duration-500 relative overflow-hidden ${
+                    mood === m 
+                      ? 'bg-white/60 backdrop-blur-xl shadow-[inset_0_1px_3px_rgba(255,255,255,0.9),0_10px_25px_rgba(0,0,0,0.1)] border border-white/80' 
+                      : 'bg-black/5 opacity-40 grayscale'
+                  }`}
+                >
+                  {mood === m && (
+                    <div className="absolute inset-0 bg-gradient-to-br from-white via-transparent to-transparent opacity-40" />
+                  )}
+                  <span className="relative z-10">{m}</span>
+                </motion.button>
+              ))}
+            </div>
+
+            {/* Lined Text Area */}
+            <div className="flex-1 relative mb-12">
+              <div className="absolute inset-0 flex flex-col pointer-events-none">
+                {[...Array(10)].map((_, i) => (
+                  <div key={i} className="flex-1 border-b border-black/[0.05]" />
                 ))}
               </div>
-
               <textarea
                 autoFocus
                 value={diaryContent}
                 onChange={(e) => setDiaryContent(e.target.value)}
-                placeholder="记录下此刻的想法..."
-                className="flex-1 bg-transparent text-[20px] font-medium text-black/80 placeholder:text-black/10 resize-none outline-none leading-relaxed"
+                placeholder="td."
+                className="absolute inset-0 bg-transparent text-[18px] font-black text-black/80 placeholder:text-black/10 resize-none outline-none leading-[1.8] py-2 px-1"
+                style={{ lineHeight: 'calc((100% - 0px) / 10)' }}
               />
             </div>
 
-            <div className="pb-12 flex items-center gap-2 text-zinc-300">
-              <Smile size={18} />
-              <span className="text-[13px] font-medium">此刻的心情是 {mood}</span>
+            {/* Bottom Buttons (2 & 3) */}
+            <div className="flex justify-center pb-12">
+              <div className="bg-black/5 backdrop-blur-xl border border-white/40 rounded-[28px] flex overflow-hidden shadow-xl shadow-black/5">
+                <motion.button 
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setIsDiaryOpen(false)}
+                  className="px-10 py-4 text-[15px] font-black text-black/40 hover:bg-black/5 transition-colors border-r border-white/20"
+                >
+                  取消
+                </motion.button>
+                <motion.button 
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setIsDiaryOpen(false)}
+                  className="px-10 py-4 text-[15px] font-black text-black/90 hover:bg-black/5 transition-colors"
+                >
+                  确认
+                </motion.button>
+              </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Bottom Navigation */}
-      <div className="bg-white/80 backdrop-blur-xl border-t border-black/[0.03] pb-8 pt-3 flex justify-around items-center px-4 z-10">
-        <div className="flex flex-col items-center gap-1">
-          <div className="w-10 h-6 bg-black rounded-full flex items-center justify-center text-white">
-            <MessageCircle size={16} fill="currentColor" />
-          </div>
-          <span className="text-[10px] text-black font-bold">Chats</span>
-        </div>
-        <div className="flex flex-col items-center gap-1 opacity-20">
-          <User size={20} />
-          <span className="text-[10px] text-black font-bold">Contacts</span>
-        </div>
-        <div className="flex flex-col items-center gap-1 opacity-20">
-          <Clock size={20} />
-          <span className="text-[10px] text-black font-bold">Discover</span>
-        </div>
-        <div className="flex flex-col items-center gap-1 opacity-20">
-          <div className="w-5 h-5 border-2 border-black rounded-md flex items-center justify-center">
-            <div className="w-2 h-2 bg-black rounded-full" />
-          </div>
-          <span className="text-[10px] text-black font-bold">Me</span>
+      {/* Bottom Navigation - Frosted Ins-Style Design */}
+      <div className="px-6 pb-10 z-10 relative">
+        <div className="bg-white/40 backdrop-blur-3xl border border-black/[0.02] rounded-[40px] py-1.5 flex justify-around items-center px-2 shadow-sm">
+          {[
+            { id: 'Chats', label: 'Chats', icon: MessageCircle },
+            { id: 'Contacts', label: 'Contacts', icon: User },
+            { id: 'Discover', label: 'Discover', icon: Clock },
+            { id: 'Me', label: 'Me', icon: User },
+          ].map((item) => {
+            const isActive = activeTab === item.id;
+            return (
+              <motion.div 
+                key={item.id}
+                onClick={() => setActiveTab(item.id)}
+                whileTap={{ scale: 0.95 }}
+                className="relative flex flex-col items-center justify-center gap-0.5 cursor-pointer z-20 py-2 px-4 min-w-[75px] h-[58px]"
+              >
+                {isActive && (
+                  <motion.div
+                    layoutId="activePill"
+                    transition={{
+                      type: "spring",
+                      bounce: 0.1,
+                      duration: 0.4
+                    }}
+                    className="absolute inset-0 bg-white rounded-[28px] shadow-[0_4px_15px_rgba(0,0,0,0.04)]"
+                  />
+                )}
+                
+                <div className={`relative z-10 transition-all duration-300 ${isActive ? 'text-black scale-105' : 'opacity-20 text-black'}`}>
+                  {item.id === 'Me' ? (
+                    <div className="w-5 h-5 border-2 border-current rounded-md flex items-center justify-center">
+                      <div className="w-2 h-2 bg-current rounded-full" />
+                    </div>
+                  ) : (
+                    <item.icon size={20} strokeWidth={isActive ? 2.5 : 2} />
+                  )}
+                </div>
+                {isActive && (
+                  <motion.span 
+                    initial={{ opacity: 0, y: 2 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-[10px] font-black tracking-tight relative z-10 text-black"
+                  >
+                    {item.label}
+                  </motion.span>
+                )}
+              </motion.div>
+            );
+          })}
         </div>
       </div>
       
       {/* Home Indicator to close */}
-      <div className="fixed bottom-2 left-1/2 -translate-x-1/2 z-[70]">
+      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-[70]">
         <div 
           onClick={onClose}
           className="w-32 h-1 bg-black/20 rounded-full cursor-pointer outline-none" 
@@ -670,7 +829,7 @@ const HomeScreen: React.FC<{ isLocked: boolean; onOpenApp: (app: string) => void
       </div>
 
       {/* Search Pill */}
-      <motion.div whileTap={{ scale: 0.95 }} className="fixed bottom-[140px] left-1/2 -translate-x-1/2 z-10 cursor-pointer touch-manipulation will-change-transform">
+      <motion.div whileTap={{ scale: 0.95 }} className="absolute bottom-[140px] left-1/2 -translate-x-1/2 z-10 cursor-pointer touch-manipulation will-change-transform">
         <div className="liquid-glass-dark px-4 py-1.5 rounded-full flex items-center gap-1.5 bg-black/5 border-none shadow-none">
           <Search size={12} className="text-black/40" strokeWidth={3} />
           <span className="text-[11px] text-black/60 font-medium tracking-tight">搜索</span>
@@ -678,12 +837,12 @@ const HomeScreen: React.FC<{ isLocked: boolean; onOpenApp: (app: string) => void
       </motion.div>
 
       {/* Dock */}
-      <div className="fixed bottom-5 left-0 right-0 px-4 z-10">
+      <div className="absolute bottom-5 left-0 right-0 px-4 z-10">
         <div className="liquid-glass rounded-[34px] px-4 py-[14px]">
           <div className="grid grid-cols-4 gap-4">
             {[
               { color: 'bg-zinc-900' },
-              { color: 'bg-zinc-800', icon: MessageCircle, iconSize: 18, onClick: () => onOpenApp('wechat') },
+              { color: 'bg-zinc-800', icon: MessageCircle, iconSize: 18, onClick: () => onOpenApp('chat') },
               { color: 'bg-zinc-600' },
               { color: 'bg-zinc-400', icon: Settings, iconSize: 18, onClick: () => onOpenApp('settings') },
             ].map((app, i) => (
@@ -694,7 +853,7 @@ const HomeScreen: React.FC<{ isLocked: boolean; onOpenApp: (app: string) => void
       </div>
 
       {/* Home Indicator */}
-      <div className="fixed bottom-2 left-1/2 -translate-x-1/2 z-20">
+      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-20">
         <div className="w-32 h-1 bg-black/20 rounded-full" />
       </div>
     </motion.div>
@@ -752,6 +911,26 @@ export default function App() {
     const progress = Math.min(v / (window.innerHeight * 0.4), 1);
     return 1 + progress * 0.1;
   });
+
+  // Dynamically update body background color to match the active app
+  // This ensures the iOS rubber-band bounce area matches the app's background seamlessly
+  useEffect(() => {
+    if (activeApp === 'settings') {
+      document.body.style.backgroundColor = '#f5f5f5';
+      document.documentElement.style.backgroundColor = '#f5f5f5';
+    } else if (activeApp === 'chat') {
+      document.body.style.backgroundColor = '#ffffff';
+      document.documentElement.style.backgroundColor = '#ffffff';
+    } else {
+      document.body.style.backgroundColor = '#e0e0e5';
+      document.documentElement.style.backgroundColor = '#e0e0e5';
+    }
+    
+    return () => {
+      document.body.style.backgroundColor = '#e0e0e5';
+      document.documentElement.style.backgroundColor = '#e0e0e5';
+    };
+  }, [activeApp]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -880,8 +1059,8 @@ export default function App() {
         {activeApp === 'settings' && (
           <SettingsApp onClose={() => setActiveApp(null)} />
         )}
-        {activeApp === 'wechat' && (
-          <WeChatApp onClose={() => setActiveApp(null)} />
+        {activeApp === 'chat' && (
+          <ChatApp onClose={() => setActiveApp(null)} />
         )}
       </AnimatePresence>
 

@@ -83,7 +83,7 @@ export default function ImageCropper({ imageSrc, widgetId, onCropComplete, onCan
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-black flex flex-col">
+    <div className="absolute inset-0 z-50 bg-black flex flex-col">
       <div className="flex-1 relative">
         <Cropper
           image={imageSrc}

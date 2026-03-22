@@ -121,15 +121,16 @@ export const ApiSettingsPage = ({ onBack }: { onBack: () => void }) => {
   return (
     <div className="flex flex-col h-full bg-[#f5f5f5] select-none font-sans">
       {/* Header */}
-      <div className="relative flex items-center justify-center pt-14 pb-4 bg-transparent z-10">
-        <div 
-          className="absolute left-4 flex items-center text-black/60 hover:text-black/90 cursor-pointer transition-colors"
+      <div className="pt-16 pb-4 flex flex-col items-center relative">
+        <motion.button 
+          whileTap={{ scale: 0.9 }}
           onClick={onBack}
+          className="absolute left-6 top-16 p-2 -ml-2 text-black/40"
         >
-          <ChevronLeft size={22} strokeWidth={1.5} />
-          <span className="text-[14px] font-medium tracking-wide">返回</span>
-        </div>
-        <span className="text-[15px] font-semibold text-black/80 tracking-widest">API设定</span>
+          <ChevronLeft size={24} />
+        </motion.button>
+        <span className="text-[15px] font-semibold text-black/80 tracking-widest mb-4">API设定</span>
+        <div className="w-full h-[1px] bg-black/5" />
       </div>
 
       {/* Floating Selector */}

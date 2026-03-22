@@ -69,6 +69,8 @@ export default function ImageCropper({ imageSrc, widgetId, onCropComplete, onCan
         <rect x="0" y="15%" width="100%" height="85%" rx="32" />
       </g>
     </svg>`;
+  } else if (widgetId === 'wallpaper') {
+    aspect = 9 / 19.5; // Standard modern phone aspect ratio
   }
 
   if (svgOutline) {

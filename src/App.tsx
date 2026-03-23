@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, useSpring, useMotionTemplate, MotionValue, animate } from 'motion/react';
 import ImageCropper from './components/ImageCropper';
-import { ApiSettingsPage } from './components/ApiSettings';
 import WallpaperSettingsPage from './components/WallpaperSettings';
 import FontSettingsPage, { FontFamily } from './components/FontSettings';
 import { DEFAULT_AVATAR } from './constants';
@@ -34,10 +33,8 @@ import {
   Home,
   Video,
   X,
-  Check,
   Smile,
   Info,
-  Key,
   Palette,
   Type,
   HeartPulse,
@@ -320,7 +317,6 @@ const SettingsApp = ({ onClose, wallpaperConfig, onUpdateWallpaper }: {
   const [activePage, setActivePage] = useState<'main' | 'api' | 'aesthetic' | 'wallpaper' | 'font'>('main');
 
   const settingsItems = [
-    { id: 'api', label: 'API设定', icon: Key, action: () => setActivePage('api') },
     { id: 'aesthetic', label: '美化设置', icon: Palette, action: () => setActivePage('aesthetic') },
     { id: 'font', label: '字体设置', icon: Type, action: () => setActivePage('font') },
     { id: 'heartbeat', label: '角色心跳', icon: HeartPulse, action: () => {} },
@@ -378,7 +374,6 @@ const SettingsApp = ({ onClose, wallpaperConfig, onUpdateWallpaper }: {
             >
               <span className="text-[14px] font-bold text-black/80 tracking-widest">更换手机壁纸</span>
             </div>
-            <div className="w-full h-[1px] bg-black/5" />
             <div 
               className="py-4 flex items-center justify-between cursor-pointer active:opacity-50 transition-opacity"
               onClick={() => setActivePage('font')}
@@ -387,10 +382,6 @@ const SettingsApp = ({ onClose, wallpaperConfig, onUpdateWallpaper }: {
             </div>
           </div>
         </>
-      ) : activePage === 'api' ? (
-        <div className="absolute inset-0 z-10 bg-[#f5f5f5]">
-          <ApiSettingsPage onBack={() => setActivePage('main')} />
-        </div>
       ) : activePage === 'font' ? (
         <div className="absolute inset-0 z-10 bg-[#f5f5f5]">
           <FontSettingsPage 

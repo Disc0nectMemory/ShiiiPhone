@@ -4,22 +4,24 @@
   "description": "从此以后我是你存在的证明",
   "start_url": "/",
   "display": "standalone",
-  "display_override": ["standalone", "fullscreen", "minimal-ui"],
+  "display_override": [
+    "standalone",
+    "fullscreen",
+    "minimal-ui"
+  ],
   "background_color": "#e0e0e5",
   "theme_color": "#e0e0e5",
   "orientation": "portrait",
   "icons": [
     {
-      "src": "https://traditional-sapphire-v04jn15eex.edgeone.app/ElmPhone.png.jpeg",
+      "src": "/icon-192.png",
       "sizes": "192x192",
-      "type": "image/jpeg",
-      "purpose": "any maskable"
+      "type": "image/png"
     },
     {
-      "src": "https://traditional-sapphire-v04jn15eex.edgeone.app/ElmPhone.png.jpeg",
+      "src": "/icon-512.png",
       "sizes": "512x512",
-      "type": "image/jpeg",
-      "purpose": "any maskable"
+      "type": "image/png"
     }
   ]
 }

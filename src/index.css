@@ -28,7 +28,13 @@
 html, body {
   height: 100%;
   width: 100%;
+  overflow: hidden;
+  position: fixed;
+  inset: 0;
   @apply bg-[#f5f5f5];
+  /* God-level: prevent any scroll or bounce at the root */
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
 }
 
 body {
@@ -38,12 +44,44 @@ body {
   -webkit-user-select: none;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
-  overscroll-behavior: auto;
+  overscroll-behavior: none;
+  touch-action: none;
 }
-  * {
-    -webkit-tap-highlight-color: transparent;
-    outline: none;
-  }
+
+.safe-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.safe-p {
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+  -webkit-touch-callout: none;
+  box-sizing: border-box;
+}
+
+/* God-level: dynamic height fix for mobile browsers */
+:root {
+  --vh: 1vh;
+}
+
+.h-screen-dynamic {
+  height: 100vh; /* Fallback */
+  height: calc(var(--vh, 1vh) * 100);
+}
+
+/* Prevent iOS Safari from showing the input accessory bar */
+input, textarea {
+  -webkit-user-select: text;
+  user-select: text;
+}
 }
 
 @layer utilities {
@@ -161,6 +199,10 @@ body {
 
 .animate-pulse-subtle {
   animation: pulse-subtle 4s ease-in-out infinite;
+}
+
+.touch-action-pan-y {
+  touch-action: pan-y !important;
 }
 
 /* Hide scrollbar */

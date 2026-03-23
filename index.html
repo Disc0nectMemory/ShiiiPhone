@@ -1,18 +1,22 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="ElmPhone" />
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="theme-color" content="#e0e0e5" />
-    <meta name="apple-touch-fullscreen" content="yes" />
-    <link rel="manifest" href="/manifest.json" />
-    <title>ElmPhone</title>
-    <script>
-      // Prevent double-tap zoom
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="ElmPhone" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#e0e0e5" />
+  <meta name="apple-touch-fullscreen" content="yes" />
+  <link rel="manifest" href="/manifest.json" />
+  <title>ElmPhone</title>
+  <link rel="icon" type="image/png" href="/icon-192.png" />
+  <link rel="apple-touch-icon" href="/icon-192.png" />
+  <script>
+    // Prevent double-tap zoom
       document.addEventListener('touchstart', function (event) {
         if (event.touches.length > 1) {
           event.preventDefault();
@@ -43,13 +47,6 @@
         window.addEventListener('load', handleVisualViewport);
       }
 
-      // Prevent scrolling on the document
-      document.addEventListener('touchmove', function(e) {
-        if (e.target === document.documentElement || e.target === document.body) {
-          e.preventDefault();
-        }
-      }, { passive: false });
-
       // Register Service Worker
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
@@ -60,11 +57,12 @@
           });
         });
       }
-    </script>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>
+  </script>
+</head>
 
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+
+</html>

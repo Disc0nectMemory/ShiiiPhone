@@ -85,32 +85,34 @@ export default function ImageCropper({ imageSrc, widgetId, onCropComplete, onCan
   }
 
   return (
-    <div className="absolute inset-0 z-50 bg-black flex flex-col">
-      <div className="flex-1 relative">
-        <Cropper
-          image={imageSrc}
-          crop={crop}
-          zoom={zoom}
-          aspect={aspect}
-          cropShape={cropShape}
-          onCropChange={setCrop}
-          onCropComplete={onCropCompleteCallback}
-          onZoomChange={setZoom}
-          showGrid={false}
-          style={{
-            containerStyle: { backgroundColor: '#000' },
-            cropAreaStyle: { border: 'none', ...cropAreaStyle }
-          }}
-        />
-      </div>
-      <div className="h-20 bg-black flex items-center justify-between px-6 pb-4 pt-2 border-t border-white/10">
-        <button onClick={onCancel} className="text-white/90 text-[16px] font-normal active:opacity-50 transition-opacity px-2 py-2">
-          取消
-        </button>
-        <div className="text-white/60 text-[13px] font-medium tracking-wide">移动和缩放</div>
-        <button onClick={handleConfirm} className="text-white text-[16px] font-semibold active:opacity-50 transition-opacity px-2 py-2">
-          完成
-        </button>
+    <div className="absolute inset-0 z-[100] bg-black/30 backdrop-blur-md flex items-center justify-center p-6">
+      <div className="w-full max-w-sm bg-white/10 backdrop-blur-3xl border border-white/20 rounded-[40px] overflow-hidden shadow-2xl flex flex-col h-[60vh]">
+        <div className="flex-1 relative">
+          <Cropper
+            image={imageSrc}
+            crop={crop}
+            zoom={zoom}
+            aspect={aspect}
+            cropShape={cropShape}
+            onCropChange={setCrop}
+            onCropComplete={onCropCompleteCallback}
+            onZoomChange={setZoom}
+            showGrid={false}
+            style={{
+              containerStyle: { backgroundColor: 'transparent' },
+              cropAreaStyle: { border: 'none', ...cropAreaStyle }
+            }}
+          />
+        </div>
+        <div className="h-20 bg-white/5 backdrop-blur-md flex items-center justify-between px-8 border-t border-white/10">
+          <button onClick={onCancel} className="text-white/80 text-[15px] font-medium active:opacity-50 transition-opacity">
+            取消
+          </button>
+          <div className="text-white/50 text-[12px] font-bold tracking-widest uppercase">移动和缩放</div>
+          <button onClick={handleConfirm} className="text-white text-[15px] font-bold active:opacity-50 transition-opacity">
+            完成
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, useSpring, useMotionTemplate, MotionValue, animate } from 'motion/react';
 import ImageCropper from './components/ImageCropper';
+import { ApiSettingsPage } from './components/ApiSettings';
 import WallpaperSettingsPage from './components/WallpaperSettings';
 import FontSettingsPage, { FontFamily } from './components/FontSettings';
+import elmPhoneBg from './assets/ElmPhone.jpeg';
 import { DEFAULT_AVATAR } from './constants';
 import { 
   Camera, 
@@ -33,8 +35,10 @@ import {
   Home,
   Video,
   X,
+  Check,
   Smile,
   Info,
+  Key,
   Palette,
   Type,
   HeartPulse,
@@ -317,6 +321,7 @@ const SettingsApp = ({ onClose, wallpaperConfig, onUpdateWallpaper }: {
   const [activePage, setActivePage] = useState<'main' | 'api' | 'aesthetic' | 'wallpaper' | 'font'>('main');
 
   const settingsItems = [
+    { id: 'api', label: 'API设定', icon: Key, action: () => setActivePage('api') },
     { id: 'aesthetic', label: '美化设置', icon: Palette, action: () => setActivePage('aesthetic') },
     { id: 'font', label: '字体设置', icon: Type, action: () => setActivePage('font') },
     { id: 'heartbeat', label: '角色心跳', icon: HeartPulse, action: () => {} },
@@ -374,14 +379,12 @@ const SettingsApp = ({ onClose, wallpaperConfig, onUpdateWallpaper }: {
             >
               <span className="text-[14px] font-bold text-black/80 tracking-widest">更换手机壁纸</span>
             </div>
-            <div 
-              className="py-4 flex items-center justify-between cursor-pointer active:opacity-50 transition-opacity"
-              onClick={() => setActivePage('font')}
-            >
-              <span className="text-[14px] font-bold text-black/80 tracking-widest">更换手机字体</span>
-            </div>
           </div>
         </>
+      ) : activePage === 'api' ? (
+        <div className="absolute inset-0 z-10 bg-[#f5f5f5]">
+          <ApiSettingsPage onBack={() => setActivePage('main')} />
+        </div>
       ) : activePage === 'font' ? (
         <div className="absolute inset-0 z-10 bg-[#f5f5f5]">
           <FontSettingsPage 
@@ -1054,8 +1057,8 @@ export default function App() {
   const [activeApp, setActiveApp] = useState<string | null>(null);
 
   const [wallpaperConfig, setWallpaperConfig] = useState<WallpaperConfig>({
-    lockWallpaper: null,
-    homeWallpaper: null,
+    lockWallpaper: elmPhoneBg,
+    homeWallpaper: elmPhoneBg,
     homeWallpaperMode: 'original',
     homeBlurAmount: 15,
     lockDateColor: '#707072',
@@ -1158,19 +1161,41 @@ export default function App() {
     if (activeApp === 'settings' || activeApp === 'characters' || activeApp === 'world') {
       document.body.style.backgroundColor = '#f5f5f5';
       document.documentElement.style.backgroundColor = '#f5f5f5';
+      document.body.style.backgroundImage = 'none';
+      document.documentElement.style.backgroundImage = 'none';
     } else if (activeApp === 'chat') {
       document.body.style.backgroundColor = '#ffffff';
       document.documentElement.style.backgroundColor = '#ffffff';
+      document.body.style.backgroundImage = 'none';
+      document.documentElement.style.backgroundImage = 'none';
     } else {
       document.body.style.backgroundColor = '#e0e0e5';
       document.documentElement.style.backgroundColor = '#e0e0e5';
+      
+      const currentWallpaper = (!isLocked && wallpaperConfig.homeWallpaperMode === 'custom') 
+        ? wallpaperConfig.homeWallpaper 
+        : wallpaperConfig.lockWallpaper;
+
+      if (currentWallpaper) {
+        document.body.style.backgroundImage = `url(${currentWallpaper})`;
+        document.body.style.backgroundSize = 'cover';
+        document.body.style.backgroundPosition = 'center';
+        document.documentElement.style.backgroundImage = `url(${currentWallpaper})`;
+        document.documentElement.style.backgroundSize = 'cover';
+        document.documentElement.style.backgroundPosition = 'center';
+      } else {
+        document.body.style.backgroundImage = 'none';
+        document.documentElement.style.backgroundImage = 'none';
+      }
     }
     
     return () => {
       document.body.style.backgroundColor = '#e0e0e5';
       document.documentElement.style.backgroundColor = '#e0e0e5';
+      document.body.style.backgroundImage = 'none';
+      document.documentElement.style.backgroundImage = 'none';
     };
-  }, [activeApp]);
+  }, [activeApp, isLocked, wallpaperConfig.lockWallpaper, wallpaperConfig.homeWallpaper, wallpaperConfig.homeWallpaperMode]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -1284,7 +1309,7 @@ export default function App() {
         To activate "Fixed Positioning", change className to include "hard-lock-active" 
         (defined in index.css) or "fixed inset-0 overflow-hidden touch-none".
       */
-      className={`min-h-[100dvh] w-screen relative bg-[#e0e0e5] select-none font-${wallpaperConfig.fontFamily || 'sans'}`}
+      className={`min-h-[100dvh] w-screen relative bg-transparent select-none font-${wallpaperConfig.fontFamily || 'sans'}`}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}

@@ -27,7 +27,7 @@ export default function WallpaperSettingsPage({ onBack, config, onSave }: Wallpa
   const [isColorMenuOpen, setIsColorMenuOpen] = useState(false);
   const [colorTarget, setColorTarget] = useState<'date' | 'time' | null>(null);
   const [tempColor, setTempColor] = useState('');
-  const [showPicker, setShowPicker] = useState(true);
+  const [showPicker, setShowPicker] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -82,9 +82,9 @@ export default function WallpaperSettingsPage({ onBack, config, onSave }: Wallpa
   const dateString = `${time.getMonth() + 1}月${time.getDate()}日 ${weekDays[time.getDay()]}`;
 
   return (
-    <div className="flex flex-col h-full bg-white font-sans select-none overflow-hidden">
+    <div className="flex flex-col h-full bg-white select-none overflow-hidden">
       {/* Header */}
-      <div className="pt-16 pb-6 px-8 flex items-center justify-between bg-white/80 backdrop-blur-xl sticky top-0 z-20 border-b border-black/[0.02]">
+      <div className="pt-16 pb-6 px-8 flex items-center justify-between bg-white sticky top-0 z-20">
         <motion.button 
           whileTap={{ scale: 0.9 }}
           onClick={onBack}
@@ -92,7 +92,7 @@ export default function WallpaperSettingsPage({ onBack, config, onSave }: Wallpa
         >
           <ChevronLeft size={28} strokeWidth={2.5} />
         </motion.button>
-        <span className="text-[17px] font-black tracking-tighter text-black/90">Wallpaper</span>
+        <span className="text-[18px] font-black tracking-tighter text-black/90">Wallpaper</span>
         <motion.button 
           whileTap={{ scale: 0.9 }}
           onClick={handleSave}
@@ -223,9 +223,9 @@ export default function WallpaperSettingsPage({ onBack, config, onSave }: Wallpa
           <motion.button
             whileTap={{ scale: 0.98 }}
             onClick={() => setIsColorMenuOpen(true)}
-            className="px-12 py-5 bg-white/10 backdrop-blur-[40px] border border-white/20 rounded-[32px] shadow-[0_8px_32px_rgba(0,0,0,0.05)] flex items-center justify-center group active:bg-white/20 transition-all"
+            className="px-10 py-4 bg-white/5 backdrop-blur-2xl border border-black/[0.03] rounded-[24px] shadow-sm flex items-center justify-center group active:bg-black/[0.02] transition-all"
           >
-            <span className="text-[12px] font-black text-black/30 tracking-[0.2em] uppercase group-hover:text-black/50 transition-colors">锁屏字体颜色</span>
+            <span className="text-[13px] font-bold text-black/40 tracking-[0.15em] uppercase group-hover:text-black/60 transition-colors">锁屏字体颜色</span>
           </motion.button>
         </div>
       </div>
@@ -239,10 +239,10 @@ export default function WallpaperSettingsPage({ onBack, config, onSave }: Wallpa
             exit={{ y: 20, opacity: 0 }}
             className="absolute bottom-[100px] left-8 right-8 z-30 flex flex-col items-center gap-6"
           >
-            <div className="w-full bg-white/5 backdrop-blur-[40px] rounded-[40px] p-8 border border-white/10 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.1)] flex flex-col gap-6">
+            <div className="w-full bg-white/10 backdrop-blur-2xl rounded-[32px] p-6 border border-white/20 shadow-2xl flex flex-col gap-4">
               <div className="w-full flex justify-between items-center px-2">
-                <span className="text-[10px] font-black text-black/15 tracking-[0.4em] uppercase">Blur Intensity</span>
-                <span className="text-[10px] font-black text-black/30 tracking-widest">{currentConfig.homeBlurAmount}px</span>
+                <span className="text-[10px] font-black text-black/20 tracking-widest uppercase">Blur Intensity</span>
+                <span className="text-[10px] font-black text-black/40 tracking-widest">{currentConfig.homeBlurAmount}px</span>
               </div>
               <div className="relative w-full h-8 flex items-center">
                 <input
@@ -254,7 +254,7 @@ export default function WallpaperSettingsPage({ onBack, config, onSave }: Wallpa
                   className="w-full h-1 bg-black/5 rounded-full appearance-none cursor-pointer accent-black"
                   style={{
                     WebkitAppearance: 'none',
-                    background: `linear-gradient(to right, rgba(0,0,0,0.2) ${currentConfig.homeBlurAmount / 40 * 100}%, rgba(0,0,0,0.05) ${currentConfig.homeBlurAmount / 40 * 100}%)`
+                    background: `linear-gradient(to right, black ${currentConfig.homeBlurAmount / 40 * 100}%, rgba(0,0,0,0.05) ${currentConfig.homeBlurAmount / 40 * 100}%)`
                   }}
                 />
                 <style jsx>{`
@@ -297,10 +297,10 @@ export default function WallpaperSettingsPage({ onBack, config, onSave }: Wallpa
             <motion.button
               whileTap={{ scale: 0.95 }}
               onClick={() => setShowHomeOptions(true)}
-              className="w-full bg-white/10 backdrop-blur-[40px] border border-white/20 py-5 rounded-[32px] shadow-xl flex items-center justify-center gap-2 group"
+              className="w-full bg-white/20 backdrop-blur-3xl border border-white/30 py-4 rounded-[24px] shadow-xl flex items-center justify-center gap-2 group"
             >
-              <span className="text-[14px] font-black text-black/60 tracking-tight">Done</span>
-              <Check size={16} className="text-black/20 group-hover:text-black/40 transition-colors" />
+              <span className="text-[14px] font-black text-black/80 tracking-tight">Done</span>
+              <Check size={16} className="text-black/40 group-hover:text-black transition-colors" />
             </motion.button>
           </motion.div>
         )}
@@ -321,7 +321,7 @@ export default function WallpaperSettingsPage({ onBack, config, onSave }: Wallpa
                 initial={{ y: 100, opacity: 0, scale: 0.9 }}
                 animate={{ y: 0, opacity: 1, scale: 1 }}
                 exit={{ y: 100, opacity: 0, scale: 0.9 }}
-                className="bg-white/10 backdrop-blur-[40px] rounded-[44px] p-2 flex items-center gap-1 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.1)] border border-white/20"
+                className="bg-white/40 backdrop-blur-2xl rounded-[40px] p-2 flex items-center gap-1 shadow-2xl border border-white/40"
                 onClick={e => e.stopPropagation()}
               >
                 {[
@@ -343,10 +343,10 @@ export default function WallpaperSettingsPage({ onBack, config, onSave }: Wallpa
                         setCurrentConfig(prev => ({ ...prev, homeWallpaperMode: opt.id as any }));
                       }
                     }}
-                    className={`flex items-center gap-2 px-8 py-4 rounded-[36px] transition-all duration-300 ${
+                    className={`flex items-center gap-2 px-6 py-3.5 rounded-[32px] transition-all duration-300 ${
                       currentConfig.homeWallpaperMode === opt.id 
-                        ? 'bg-white/20 text-black/80 shadow-inner shadow-black/5' 
-                        : 'text-black/30 hover:bg-white/10'
+                        ? 'bg-white/60 text-black shadow-inner shadow-black/5' 
+                        : 'text-black/60 hover:bg-white/20'
                     }`}
                   >
                     <opt.icon size={16} strokeWidth={2.5} />
@@ -362,10 +362,10 @@ export default function WallpaperSettingsPage({ onBack, config, onSave }: Wallpa
                 exit={{ y: 100, opacity: 0 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setIsHomeMenuOpen(false)}
-                className="w-full bg-white/10 backdrop-blur-[40px] border border-white/20 py-5 rounded-[32px] shadow-xl flex items-center justify-center gap-2 group"
+                className="w-full bg-white/20 backdrop-blur-3xl border border-white/30 py-4 rounded-[24px] shadow-xl flex items-center justify-center gap-2 group"
               >
-                <span className="text-[14px] font-black text-black/60 tracking-tight">Done</span>
-                <Check size={16} className="text-black/20 group-hover:text-black/40 transition-colors" />
+                <span className="text-[14px] font-black text-black/80 tracking-tight">Done</span>
+                <Check size={16} className="text-black/40 group-hover:text-black transition-colors" />
               </motion.button>
             </div>
           </motion.div>
@@ -395,112 +395,114 @@ export default function WallpaperSettingsPage({ onBack, config, onSave }: Wallpa
                   initial={{ y: 100, opacity: 0, scale: 0.9 }}
                   animate={{ y: 0, opacity: 1, scale: 1 }}
                   exit={{ y: 100, opacity: 0, scale: 0.9 }}
-                  className="bg-white/10 backdrop-blur-[40px] rounded-[44px] p-2 flex items-center gap-1 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.1)] border border-white/20"
+                  className="bg-white/30 backdrop-blur-3xl rounded-[40px] p-2 flex items-center gap-1 shadow-2xl border border-white/20"
                 >
-                    <motion.button
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => {
-                        setColorTarget('date');
-                        setTempColor(currentConfig.lockDateColor || '#707072');
-                        setShowPicker(true);
-                      }}
-                      className="flex items-center gap-2 px-12 py-4 rounded-[36px] text-black/30 hover:bg-white/10 transition-all"
-                    >
-                      <span className="text-[14px] font-black tracking-widest">日期</span>
-                    </motion.button>
-                    <div className="w-[1px] h-6 bg-black/5" />
-                    <motion.button
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => {
-                        setColorTarget('time');
-                        setTempColor(currentConfig.lockTimeColor || '#FFFFFF');
-                        setShowPicker(true);
-                      }}
-                      className="flex items-center gap-2 px-12 py-4 rounded-[36px] text-black/30 hover:bg-white/10 transition-all"
-                    >
-                      <span className="text-[14px] font-black tracking-widest">时间</span>
-                    </motion.button>
+                  <motion.button
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => {
+                      setColorTarget('date');
+                      setTempColor(currentConfig.lockDateColor || '#707072');
+                    }}
+                    className="flex items-center gap-2 px-10 py-4 rounded-[32px] text-black/50 hover:bg-white/40 transition-all"
+                  >
+                    <span className="text-[14px] font-bold tracking-widest">日期</span>
+                  </motion.button>
+                  <div className="w-[1px] h-6 bg-black/5" />
+                  <motion.button
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => {
+                      setColorTarget('time');
+                      setTempColor(currentConfig.lockTimeColor || '#FFFFFF');
+                    }}
+                    className="flex items-center gap-2 px-10 py-4 rounded-[32px] text-black/50 hover:bg-white/40 transition-all"
+                  >
+                    <span className="text-[14px] font-bold tracking-widest">时间</span>
+                  </motion.button>
                 </motion.div>
               ) : (
-                  <motion.div
-                    initial={{ y: 50, opacity: 0, scale: 0.95 }}
-                    animate={{ y: 0, opacity: 1, scale: 1 }}
-                    exit={{ y: 50, opacity: 0, scale: 0.95 }}
-                    className="w-full bg-white/5 backdrop-blur-[40px] rounded-[40px] p-8 border border-white/10 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.1)] flex flex-col gap-8 relative overflow-hidden"
-                  >
-                    {/* Liquid Glass Accents */}
-                    <div className="absolute -top-24 -left-24 w-48 h-48 bg-white/10 rounded-full blur-[60px] pointer-events-none" />
-                    <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-black/5 rounded-full blur-[60px] pointer-events-none" />
-                    
-                    <div className="flex justify-between items-center px-2 relative z-10">
-                      <span className="text-[10px] font-black text-black/15 tracking-[0.4em] uppercase">
-                        {colorTarget === 'date' ? 'Date Color' : 'Time Color'}
-                      </span>
-                      <div 
-                        className="w-5 h-5 rounded-full border border-white/20 shadow-sm" 
-                        style={{ backgroundColor: tempColor }}
+                <motion.div
+                  initial={{ y: 50, opacity: 0, scale: 0.95 }}
+                  animate={{ y: 0, opacity: 1, scale: 1 }}
+                  exit={{ y: 50, opacity: 0, scale: 0.95 }}
+                  className="w-full bg-white/40 backdrop-blur-3xl rounded-[36px] p-8 border border-white/30 shadow-2xl flex flex-col gap-8"
+                >
+                  <div className="flex justify-between items-center px-2">
+                    <span className="text-[11px] font-bold text-black/20 tracking-[0.3em] uppercase">
+                      {colorTarget === 'date' ? 'Date Color' : 'Time Color'}
+                    </span>
+                    <div 
+                      className="w-6 h-6 rounded-full border border-white/40 shadow-sm" 
+                      style={{ backgroundColor: tempColor }}
+                    />
+                  </div>
+                  
+                  <div className="flex flex-col gap-6">
+                    <div className="relative group">
+                      <input 
+                        type="text"
+                        value={tempColor}
+                        onChange={(e) => setTempColor(e.target.value)}
+                        placeholder="#000000"
+                        className="w-full bg-black/[0.03] border-none outline-none px-8 py-5 rounded-[24px] text-[18px] font-mono font-medium text-black/60 placeholder:text-black/5 text-center tracking-widest"
                       />
                     </div>
-                    
-                    <div className="flex flex-col gap-6 relative z-10">
-                      <div className="relative group">
-                        <input 
-                          type="text"
-                          value={tempColor}
-                          onChange={(e) => setTempColor(e.target.value)}
-                          placeholder="#000000"
-                          autoComplete="off"
-                          autoCorrect="off"
-                          autoCapitalize="off"
-                          spellCheck="false"
-                          tabIndex={-1}
-                          className="w-full bg-black/[0.02] border border-white/5 outline-none px-8 py-4 rounded-[24px] text-[13px] font-sans font-black text-black/40 placeholder:text-black/5 text-center tracking-[0.2em] transition-all focus:bg-black/[0.04]"
-                        />
-                      </div>
 
-                      <div className="flex flex-col items-center gap-4">
-                        {/* iOS Palette UI - Now always visible and more refined */}
-                        <div className="w-full flex flex-col items-center">
-                          <div className="w-full h-28 rounded-[28px] relative overflow-hidden shadow-inner border border-white/10 bg-white/5">
-                            <input 
-                              type="color"
-                              value={tempColor.startsWith('#') ? tempColor : '#FFFFFF'}
-                              onChange={(e) => setTempColor(e.target.value.toUpperCase())}
-                              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
-                            />
-                            <div 
-                              className="absolute inset-0 pointer-events-none opacity-80"
-                              style={{ 
-                                background: `linear-gradient(to right, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%)`
-                              }}
-                            />
-                            <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-white/40 via-transparent to-black/40 opacity-40" />
-                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                              <span className="text-[9px] font-black text-white/30 tracking-[0.5em] uppercase">iOS Palette</span>
+                    <div className="flex flex-col items-center gap-4">
+                      {/* Inconspicuous Palette Trigger */}
+                      <motion.button
+                        whileTap={{ scale: 0.9 }}
+                        onClick={() => setShowPicker(!showPicker)}
+                        className="w-8 h-8 rounded-full bg-gradient-to-br from-zinc-200 via-zinc-400 to-zinc-600 border border-white/40 shadow-sm opacity-40 hover:opacity-100 transition-opacity"
+                      />
+
+                      <AnimatePresence>
+                        {showPicker && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            className="w-full overflow-hidden flex flex-col items-center pt-2"
+                          >
+                            <div className="w-full h-32 rounded-2xl relative overflow-hidden shadow-inner border border-white/20">
+                              <input 
+                                type="color"
+                                value={tempColor.startsWith('#') ? tempColor : '#FFFFFF'}
+                                onChange={(e) => setTempColor(e.target.value.toUpperCase())}
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                              />
+                              <div 
+                                className="absolute inset-0 pointer-events-none"
+                                style={{ 
+                                  background: `linear-gradient(to right, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%)`
+                                }}
+                              />
+                              <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-white via-transparent to-black opacity-50" />
+                              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                <span className="text-[10px] font-bold text-white/40 tracking-widest uppercase">iOS Palette</span>
+                              </div>
                             </div>
-                            {/* Liquid Glass Overlay */}
-                            <div className="absolute inset-0 pointer-events-none backdrop-blur-[2px] bg-white/5" />
-                          </div>
-                        </div>
-                      </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </div>
+                  </div>
 
-                    <motion.button
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => {
-                        if (colorTarget === 'date') {
-                          setCurrentConfig(prev => ({ ...prev, lockDateColor: tempColor }));
-                        } else {
-                          setCurrentConfig(prev => ({ ...prev, lockTimeColor: tempColor }));
-                        }
-                        setColorTarget(null);
-                        setShowPicker(true);
-                      }}
-                      className="w-full bg-black/5 text-black/30 py-4 rounded-[24px] text-[12px] font-black tracking-[0.3em] uppercase active:bg-black/10 transition-all border border-white/5 shadow-sm relative z-10"
-                    >
-                      Done
-                    </motion.button>
-                  </motion.div>
+                  <motion.button
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => {
+                      if (colorTarget === 'date') {
+                        setCurrentConfig(prev => ({ ...prev, lockDateColor: tempColor }));
+                      } else {
+                        setCurrentConfig(prev => ({ ...prev, lockTimeColor: tempColor }));
+                      }
+                      setColorTarget(null);
+                      setShowPicker(false);
+                    }}
+                    className="w-full bg-white/60 text-black/60 py-5 rounded-[24px] text-[14px] font-bold tracking-[0.2em] uppercase active:bg-white/80 transition-all border border-white/40 shadow-sm"
+                  >
+                    Done
+                  </motion.button>
+                </motion.div>
               )}
 
               {/* Outer Confirmation Button */}
@@ -511,10 +513,10 @@ export default function WallpaperSettingsPage({ onBack, config, onSave }: Wallpa
                   exit={{ y: 100, opacity: 0 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => setIsColorMenuOpen(false)}
-                  className="w-full bg-white/10 backdrop-blur-[40px] border border-white/20 py-5 rounded-[32px] shadow-xl flex items-center justify-center gap-2 group"
+                  className="w-full bg-white/20 backdrop-blur-3xl border border-white/30 py-4 rounded-[24px] shadow-xl flex items-center justify-center gap-2 group"
                 >
-                  <span className="text-[14px] font-black text-black/60 tracking-tight">Done</span>
-                  <Check size={16} className="text-black/20 group-hover:text-black/40 transition-colors" />
+                  <span className="text-[14px] font-black text-black/80 tracking-tight">Done</span>
+                  <Check size={16} className="text-black/40 group-hover:text-black transition-colors" />
                 </motion.button>
               )}
             </div>

@@ -28,24 +28,19 @@
 html, body {
   height: 100%;
   width: 100%;
-  overflow: hidden;
-  position: fixed;
-  inset: 0;
-  @apply bg-[#f5f5f5];
-  /* God-level: prevent any scroll or bounce at the root */
-  overscroll-behavior: none;
+  background-color: #e0e0e5;
   -webkit-overflow-scrolling: touch;
 }
 
 body {
-  @apply bg-[#f5f5f5] text-black antialiased;
+  color: black;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   font-family: var(--font-sans);
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
-  overscroll-behavior: none;
-  touch-action: none;
 }
 
 .safe-top {
